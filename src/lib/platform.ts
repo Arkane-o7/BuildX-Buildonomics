@@ -62,7 +62,9 @@ export async function principal(req: Request, ownerOnly = false): Promise<Princi
   throw new AppError(401, "Sign in to your AgentPass account.");
 }
 export function publicAccount(account: OwnerAccount): PublicAccount {
-  return { ...account, agents: account.agents.map(({ tokenHash, ...agent }) => { void tokenHash; return { ...agent, avatar: effectiveAvatar(agent) }; }) };
+  const { phoneDevices, phoneRequests, ...safe } = account;
+  void phoneDevices; void phoneRequests;
+  return { ...safe, agents: account.agents.map(({ tokenHash, ...agent }) => { void tokenHash; return { ...agent, avatar: effectiveAvatar(agent) }; }) };
 }
 export function controlEvent(account: OwnerAccount, type: string, detail: string, agentId?: string) {
   account.events.unshift({ id: randomUUID(), time: new Date().toISOString(), type, detail, ...(agentId ? { agentId } : {}) });
