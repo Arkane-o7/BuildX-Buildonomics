@@ -18,6 +18,8 @@ In Vercel, open the `agentpass-buildx` project. Set `EVENT_DISABLED=true` and re
 
 Revoke the AgentPass-scoped agent token and rotate/delete only the Razorpay test/live API key created for this event. Remove its event webhook in the Razorpay dashboard. Do not rotate an existing key shared by unrelated applications.
 
+This event has two Razorpay Test Mode webhook records to remove during cleanup: `TcoBpDr1YBE6Le` is the enabled signed webhook (`/api/webhooks/razorpay?integration=agentpass-test`); `Tcnnew4K2PUrHH` is the disabled original (`/api/webhooks/razorpay`). The original lacked a signing secret and was replaced after its edit form returned a Razorpay JSON-decoding error. Both records belong to this event.
+
 **3. Remove the isolated Hermes files**
 
 Run `npm run hermes:remove-event -- --yes`. It deletes only the project-owned `.hermes-event` folder when its AgentPass marker matches this project. The script must refuse to operate on `~/.hermes` or an unmarked directory. Do not delete your normal Hermes folder, Python environment, model login or existing skills.
