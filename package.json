@@ -23,7 +23,11 @@
     "hermes:platform": "python3 scripts/platform-plugin.py run",
     "hermes:prepare-platform": "python3 scripts/platform-plugin.py prepare",
     "hermes:remove-platform": "python3 scripts/platform-plugin.py remove",
-    "plugin:check": "tsx scripts/platform-mcp-check.ts"
+    "plugin:check": "tsx scripts/platform-mcp-check.ts",
+    "demo:identity-wallet": "tsx scripts/identity-wallet-demo.ts",
+    "hermes:shopping": "python3 scripts/platform-plugin.py shop",
+    "hermes:prepare-shopping": "python3 scripts/platform-plugin.py prepare-shop",
+    "hermes:remove-shopping": "python3 scripts/platform-plugin.py remove-shop"
   },
   "dependencies": {
     "next": "^16.2.1",

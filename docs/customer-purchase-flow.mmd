@@ -1,0 +1,11 @@
+flowchart LR
+    U["You set rules in AgentPass"] --> A["Hermes checks its identity"]
+    A --> M["Shopping tools find item and final total"]
+    M --> P["AgentPass checks rules and reserves allowance"]
+    P --> C["Merchant checkout: you complete payment today"]
+    C --> R["Merchant confirms order; Hermes records report"]
+    P -. "Future integration" .-> F["Delegated payment provider executes within limits"]
+    classDef current fill:#eef0ff,stroke:#545dd4,color:#1c2b43
+    classDef future fill:#fff,stroke:#999,color:#777,stroke-dasharray:5 5
+    class U,A,M,P,C,R current
+    class F future

@@ -9,3 +9,5 @@ playwright-report
 *.log
 
 .hermes-platform/
+
+.hermes-shopping/

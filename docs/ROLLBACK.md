@@ -56,3 +56,9 @@ Stop `npm run hermes:platform`, then run `npm run hermes:remove-platform -- --ye
 Rotate/revoke customer agent credentials in the workspace. After exporting anything needed, delete the local `.agentpass-private/platform-plugin.json`, `agentpass-mcp.json`, `PLATFORM-DEMO.json` and local `customer-accounts.json` if present. They contain private credentials or customer data. Remove `agentpass_accounts` only if all its data belongs to this event. The global `EVENT_DISABLED=true` switch disables both the customer and legacy APIs after redeployment.
 
 An earlier Razorpay recurring-payment capability probe created a **test** customer and authorization order, tracked in `.agentpass-private/autopay-probe.json`. No successful mandate was established. Its local HTML and provider documentation are private, ignored experiment files. The local probe server was stopped. Do not confuse those resources with the customer SaaS or with an active UPI/card funding connection.
+
+## Native Hermes shopping profile
+
+Type `/exit` in the shopping Hermes session and close its dedicated Chrome window before cleanup. Run `npm run hermes:remove-shopping -- --yes`. It removes only the marked `.hermes-shopping` directory, including its copied model authentication, Hermes session history and `chrome-debug` browser login data. It preserves `.hermes-platform`, your original `~/.hermes`, and your normal Chrome profile. No shell startup file or global Hermes configuration was changed. Verify with `npm run hermes:check-original`.
+
+Deleting this local profile does not cancel a merchant order, refund a payment or release a server-side allowance reservation. Handle those separately in the merchant account and AgentPass dashboard after checking the actual order/payment state.

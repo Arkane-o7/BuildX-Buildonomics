@@ -25,6 +25,8 @@ The setup prompt validates your scoped agent token and stores it in `.agentpass-
 
 When a credential is rotated in the dashboard, rerun `plugin:configure`. The old credential no longer works. Revoking an agent blocks spending authority but still permits status/history lookup.
 
+For native Hermes shopping, run `npm run hermes:shopping -- --cli`, then type `/browser connect` inside Hermes. This separate `.hermes-shopping` profile enables Hermes's own browser tools alongside AgentPass. Follow [the shopping walkthrough](docs/HERMES-SHOPPING.md). The browser prepares merchant checkout; the current payment reference still cannot execute bank debits.
+
 ## Local hosting
 
 ```sh
