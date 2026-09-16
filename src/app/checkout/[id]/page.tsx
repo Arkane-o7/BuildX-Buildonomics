@@ -53,6 +53,7 @@ export default function CheckoutPage({
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     setData(d);
+    if (d.payment.status === "paid") setError("");
   }, [id, access]);
   useEffect(() => {
     if (data && ["paid", "failed", "blocked"].includes(data.payment.status))
