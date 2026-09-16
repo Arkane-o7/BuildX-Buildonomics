@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Check,
   CreditCard,
-  Fingerprint,
   LoaderCircle,
   ShieldCheck,
   Zap,
@@ -162,7 +161,11 @@ export default function CheckoutPage({
     <main className="checkout-shell">
       <a href="/" className="brand">
         <span className="brand-mark">
-          <Fingerprint size={25} />
+          <img
+            src="/logo.png"
+            alt="AgentPass logo"
+            style={{ imageRendering: "auto" }}
+          />
         </span>
         agentpass<span className="brand-period">.</span>
       </a>
@@ -191,12 +194,6 @@ export default function CheckoutPage({
                   ? "Checkout declined"
                   : "A purchase needs your approval"}
             </h1>
-            <p>
-              {data.agent.name} requested <strong>{p.serviceName}</strong>.{" "}
-              {p.mode === "rehearsal"
-                ? "This is a simulated purchase of sample content."
-                : "Payment is collected by the connected Razorpay merchant for this sample service."}
-            </p>
             <div className="checkout-amount">{money(p.amount)}</div>
             <dl className="receipt-details">
               <dt>Payment method</dt>
@@ -237,10 +234,6 @@ export default function CheckoutPage({
             ) : p.status === "awaiting_checkout" ? (
               p.mode === "rehearsal" ? (
                 <>
-                  <p>
-                    No bank or card will be charged. Choose an outcome to
-                    exercise the policy, ledger and receipt flow.
-                  </p>
                   <div className="form-row">
                     <button
                       className="button secondary"
@@ -261,11 +254,6 @@ export default function CheckoutPage({
                 </>
               ) : (
                 <>
-                  <p>
-                    Continue to Razorpay to confirm using your{" "}
-                    {p.rail === "upi" ? "UPI app or QR code" : "card"}.
-                    AgentPass never receives your PIN or card details.
-                  </p>
                   <button
                     className="button primary"
                     disabled={busy}
