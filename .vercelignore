@@ -1,0 +1,9 @@
+.git
+.env*
+.agentpass-private
+.hermes-event
+node_modules
+.next
+test-results
+playwright-report
+*.log

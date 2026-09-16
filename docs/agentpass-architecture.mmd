@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor Owner
+    participant Hermes as Hermes + MCP
+    participant API as AgentPass / Vercel
+    participant DB as Neon Postgres
+    participant R as Razorpay
+    actor Payer
+    Owner->>API: Set allowance, cap and approved services
+    API->>DB: Save policy and audit event
+    Hermes->>API: Request service (scoped token + request ID)
+    API->>DB: Lock workspace, check policy, reserve budget
+    DB-->>API: Atomic decision
+    alt Request denied
+        API-->>Hermes: Blocked with reason - no payment order
+    else Request allowed
+        API->>R: Create INR order
+        R-->>API: Provider order ID
+        API-->>Hermes: Checkout URL - payment pending
+        Hermes-->>Payer: Ask for checkout confirmation
+        Payer->>R: Confirm UPI or credit card payment
+        R-->>API: Signed callback or webhook
+        API->>R: Independently fetch payment
+        R-->>API: Exact order, amount, INR and captured status
+        API->>DB: Settle reservation, append signed receipt
+        Hermes->>API: Query original request ID
+        API-->>Hermes: Sample service result and Ed25519 receipt
+    end
+    Note over API,R: Public rehearsal simulates checkout - no real money moves.
+    Note over Owner,Payer: Live payments require activated merchant credentials and payer confirmation.

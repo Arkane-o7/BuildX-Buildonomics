@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+.agentpass-private/
+.hermes-event/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.DS_Store
+*.log
+.vercel
