@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Activity, ArrowRight, ArrowUpRight, Check, Copy, CreditCard, Fingerprint, KeyRound, Link2, LoaderCircle, LogOut, Plus, ShieldCheck, SlidersHorizontal, Terminal, Wallet, X } from "lucide-react";
 import { money } from "@/lib/contracts";
 import type { PublicAccount, PurchaseIntent } from "@/lib/platform-types";
@@ -11,6 +11,21 @@ async function api(path: string, input?: unknown) {
   return result;
 }
 const tabs = [{ name: "Agents", icon: Fingerprint }, { name: "Payment accounts", icon: Wallet }, { name: "Activity", icon: Activity }, { name: "Connect plugin", icon: Terminal }, { name: "Subscription", icon: CreditCard }];
+function CustomCursor() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      const el = ref.current;
+      if (!el) return;
+      el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      const hovering = (e.target as HTMLElement)?.closest?.('button, a, input, label, select, [role="button"]');
+      el.classList.toggle("cursor-hover", !!hovering);
+    };
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, []);
+  return <div className="custom-cursor" ref={ref} />;
+}
 export default function AgentPass() {
   const [account, setAccount] = useState<PublicAccount | null>(null);
   const [loading, setLoading] = useState(true), [signup, setSignup] = useState(false), [authOpen, setAuthOpen] = useState(false);
@@ -47,7 +62,7 @@ export default function AgentPass() {
   }
   const authForm = <form onSubmit={signIn} className="saas-form">{signup && <label>Your name<input name="name" autoComplete="name" maxLength={80} required /></label>}<label>Email<input name="email" type="email" autoComplete="email" maxLength={200} required /></label><label>Password<input name="password" type="password" autoComplete={signup ? "new-password" : "current-password"} minLength={12} maxLength={200} required /><small>At least 12 characters. Email verification and password recovery are not available in this event build.</small></label><button className="button primary" disabled={busy}>{busy ? <LoaderCircle size={16} className="spin" /> : <ArrowRight size={16} />}{signup ? "Create trial account" : "Sign in"}</button><button type="button" className="text-button" onClick={() => { setSignup(!signup); setError(""); }}>{signup ? "Already have an account? Sign in" : "New to AgentPass? Create an account"}</button></form>;
   if (loading) return <main className="saas-loading"><Fingerprint size={38} /><p>Opening AgentPass…</p></main>;
-  return <div className="saas">
+  return <div className="saas"><CustomCursor />
     {!account ? <>
       <header className="saas-site-header"><a className="brand" href="/"><span className="brand-mark"><img src="/logo.png" alt="AgentPass logo" style={{ imageRendering: "auto" }} /></span>agentpass<span className="brand-period">.</span></a><nav><a href="#how-it-works">How it works</a><a href="#plugin">The plugin</a><button className="button secondary" onClick={() => { setSignup(false); setAuthOpen(true); }}>Sign in</button></nav></header>
       <main className="saas-landing">
@@ -57,9 +72,9 @@ export default function AgentPass() {
         <section className="saas-explainer" id="how-it-works"><div><span className="eyebrow">THE CONTROL LAYER</span><h2>One place to manage<br />what your agents can do.</h2></div><ol><li><strong>Register an identity</strong><p>Give each agent its own credential and an owner-attested passport.</p></li><li><strong>Bind an account and set rules</strong><p>Choose the payment account, merchant allowlist and spending limits.</p></li><li><strong>Authorize exact purchases</strong><p>The plugin requests permission for a specific merchant, item and total.</p></li><li><strong>Keep the evidence</strong><p>Review requests, track reported orders and revoke new spending authority.</p></li></ol></section>
         <section className="saas-plugin-pitch" id="plugin"><Terminal size={27} /><div><h2>A plugin for the agent you already use.</h2><p>Connect Hermes or an MCP-compatible runtime. AgentPass supplies identity and authorization; your agent's browser or commerce tools handle shopping.</p><p className="saas-capability">This build supports account references and policy authorization. Autonomous UPI/card execution and paid subscriptions are not connected yet. No simulated balance is presented as a wallet.</p></div><button className="button secondary" onClick={() => { setSignup(true); setAuthOpen(true); }}>Connect an agent <ArrowUpRight size={16} /></button></section>
       </main><footer className="saas-site-footer"><span>AgentPass · BuildX</span><a href="https://github.com/Arkane-o7/BuildX-Buildonomics" target="_blank" rel="noreferrer">Source & setup ↗</a><a href="/lab">Earlier checkout experiment</a></footer>
-    </> : <div className="app-shell"><aside className="sidebar"><a className="brand" href="/"><span className="brand-mark"><img src="/logo.png" alt="AgentPass logo" style={{ imageRendering: "auto" }} /></span>agentpass<span className="brand-period">.</span></a><div className="workspace"><span className="workspace-icon">{account.name.slice(0, 1).toUpperCase()}</span><div><strong>{account.name}</strong><small>Personal workspace</small></div></div><span className="nav-caption">MANAGE</span><nav>{tabs.map(({ name, icon: Icon }) => <button key={name} className={`nav-item ${tab === name ? "active" : ""}`} onClick={() => setTab(name)}><Icon size={18} />{name}</button>)}</nav><div className="sidebar-bottom"><div className="side-note"><ShieldCheck size={20} /><strong>Authority stays with you.</strong><p>Agent credentials cannot edit owner policies or connect payment accounts.</p></div><button className="nav-item" onClick={() => action(async () => { await api("logout", {}); setAccount(null); setToken(""); })}><LogOut size={16} />Sign out</button></div></aside>
-      <div className="main-shell"><header className="topbar"><div className="breadcrumbs">Your workspace <ArrowRight size={12} /><strong>{tab}</strong></div><span className="mode-chip">Event trial · no subscription charge</span></header><main className="dashboard">
-        <div className="page-heading"><div><div className="eyebrow">AGENTPASS CONTROL PLANE</div><h1>{tab === "Agents" ? "Identity comes first." : tab}</h1><p>{tab === "Agents" ? "Your agents, their payment accounts, and the authority you give them." : tab === "Payment accounts" ? "Manage account bindings without handing financial secrets to your agents." : tab === "Activity" ? "Policy decisions and order reports. Evidence sources stay explicit." : tab === "Connect plugin" ? "Scoped access for Hermes and other MCP-compatible agents." : "Your AgentPass software plan is separate from your agents’ purchases."}</p></div>{tab === "Agents" && <button className="button primary" onClick={() => setModal("agent")}><Plus size={16} />Register agent</button>}{tab === "Payment accounts" && <button className="button primary" onClick={() => setModal("wallet")}><Plus size={16} />Add account reference</button>}</div>
+    </> : <div className="app-shell"><aside className="sidebar"><a className="brand" href="/"><span className="brand-mark"><img src="/logo.png" alt="AgentPass logo" style={{ imageRendering: "auto" }} /></span>agentpass<span className="brand-period">.</span></a><div className="workspace"><span className="workspace-icon">{account.name.slice(0, 1).toUpperCase()}</span><div><strong>{account.name}</strong><small>Personal workspace</small></div></div><span className="nav-caption">MANAGE</span><nav>{tabs.map(({ name, icon: Icon }) => <button key={name} className={`nav-item ${tab === name ? "active" : ""}`} onClick={() => setTab(name)}><Icon size={18} />{name}</button>)}</nav><div className="sidebar-bottom"><button className="nav-item" onClick={() => action(async () => { await api("logout", {}); setAccount(null); setToken(""); })}><LogOut size={16} />Sign out</button></div></aside>
+      <div className="main-shell"><header className="topbar"><div className="breadcrumbs">Your workspace <ArrowRight size={12} /><strong>{tab}</strong></div></header><main className="dashboard">
+        <div className="page-heading"><div><h1>{tab === "Agents" ? `Welcome back, ${account.name}.` : tab}</h1>{tab !== "Agents" && <p>{tab === "Payment accounts" ? "Manage account bindings without handing financial secrets to your agents." : tab === "Activity" ? "Policy decisions and order reports. Evidence sources stay explicit." : tab === "Connect plugin" ? "Scoped access for Hermes and other MCP-compatible agents." : "Your AgentPass software plan is separate from your agents’ purchases."}</p>}</div>{tab === "Agents" && <button className="button primary" onClick={() => setModal("agent")}><Plus size={16} />Register agent</button>}{tab === "Payment accounts" && <button className="button primary" onClick={() => setModal("wallet")}><Plus size={16} />Add account reference</button>}</div>
         {error && <div role="alert" className="alert error">{error}</div>}{notice && <div role="status" className="alert success">{notice}</div>}
         {tab === "Agents" && <>
           {!account.agents.length ? <section className="saas-empty"><Fingerprint size={40} /><h2>Meet your first agent.</h2><p>Register Hermes, give it an identity, and choose the rules that follow it.</p><button className="button primary" onClick={() => setModal("agent")}>Register your first agent <ArrowRight size={16} /></button></section> : <>
