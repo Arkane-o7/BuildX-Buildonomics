@@ -13,15 +13,11 @@ import {
   ArrowUpRight,
   Check,
   ChevronRight,
-  CreditCard,
   Fingerprint,
-  Globe,
   KeyRound,
   LayoutDashboard,
   Link2,
   LoaderCircle,
-  LockKeyhole,
-  Radio,
   RefreshCw,
   ShieldCheck,
   SlidersHorizontal,
@@ -29,7 +25,6 @@ import {
   Terminal,
   Wallet,
   X,
-  Zap,
 } from "lucide-react";
 import {
   money,
@@ -182,7 +177,11 @@ export default function Home() {
       <aside className="sidebar">
         <a className="brand" href="/">
           <span className="brand-mark">
-            <Fingerprint size={25} />
+            <img
+              src="/logo.png"
+              alt="AgentPass logo"
+              style={{ imageRendering: "auto" }}
+            />
           </span>
           agentpass<span className="brand-period">.</span>
         </a>
@@ -190,7 +189,6 @@ export default function Home() {
           <span className="workspace-icon">B</span>
           <div>
             <strong>BuildX Labs</strong>
-            <small>Agent workspace</small>
           </div>
           <ChevronRight size={15} />
         </div>
@@ -247,7 +245,6 @@ export default function Home() {
               <br />
               Keep owners in control.
             </strong>
-            <p>Every purchase has a policy, a payer, and a record.</p>
           </div>
           <a
             className="nav-item"
@@ -315,9 +312,6 @@ export default function Home() {
             <div>
               <div className="eyebrow">THE AGENT CONTROL ROOM</div>
               <h1>Permission to move forward.</h1>
-              <p>
-                One identity. Clear spending limits. Every action accounted for.
-              </p>
             </div>
             <button
               className="button secondary"
@@ -356,22 +350,10 @@ export default function Home() {
               </button>
             </div>
           )}
-          {data?.role === "demo" && (
-            <div className="showcase-banner">
-              <div>
-                <Sparkles size={19} />
-                <span>
-                  <strong>Your private rehearsal.</strong> Purchases are
-                  simulated. The live workspace is separate.
-                </span>
-              </div>
-            </div>
-          )}
           {!data || !a ? (
             <div className="loading-state">
               <LoaderCircle className="spin" />
               <h2>Connecting to your workspace</h2>
-              <p>Loading identity, spending policy and activity.</p>
             </div>
           ) : (
             <>
@@ -388,16 +370,22 @@ export default function Home() {
                   </div>
                   <div className="agent-identity">
                     <div className="agent-avatar">
-                      <span />
-                      <span />
-                      <div />
+                      <img
+                        src="/agent-avatar-crab.gif"
+                        alt={`${a.name} agent avatar`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: "inherit",
+                        }}
+                      />
                     </div>
                     <div>
                       <h2>
                         {a.name}
                         <span>01</span>
                       </h2>
-                      <p>{a.description}</p>
                     </div>
                   </div>
                   <div className="passport-fields">
@@ -419,16 +407,12 @@ export default function Home() {
                   </div>
                   <div className="passport-footer">
                     <Fingerprint size={17} />
-                    <span>
-                      Owner-attested identity · funding reference v
-                      {a.bindingVersion}
-                    </span>
                     <ShieldCheck size={16} />
                   </div>
                 </section>
                 <section className="budget-card">
                   <div className="card-top">
-                    <span className="section-label">Spending allowance</span>
+                    <span className="section-label">Wallet</span>
                     <Wallet size={18} />
                   </div>
                   <div className="budget-number">
@@ -469,119 +453,8 @@ export default function Home() {
                   </div>
                 </section>
               </div>
-              <div className="control-strip">
-                <div>
-                  <ShieldCheck size={18} />
-                  <span>
-                    <small>Per purchase</small>
-                    <strong>{money(a.perTransaction)} limit</strong>
-                  </span>
-                </div>
-                <div>
-                  <Check size={18} />
-                  <span>
-                    <small>Approved services</small>
-                    <strong>{a.allowedServices.length} allowed</strong>
-                  </span>
-                </div>
-                <div>
-                  <CreditCard size={18} />
-                  <span>
-                    <small>Payment methods</small>
-                    <strong>UPI & credit cards</strong>
-                  </span>
-                </div>
-                <div>
-                  <Radio size={18} />
-                  <span>
-                    <small>Hermes connection</small>
-                    <strong>
-                      {a.lastSeen
-                        ? `Seen ${new Date(a.lastSeen).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                        : "Not connected yet"}
-                    </strong>
-                  </span>
-                </div>
-              </div>
               <div className="content-grid">
                 <div className="primary-column">
-                  <section className="panel">
-                    <div className="section-heading">
-                      <div>
-                        <h2>Put your agent to work</h2>
-                        <p>
-                          Request a service. Check the policy. Confirm the
-                          payment.
-                        </p>
-                      </div>
-                      <div className="rail-picker" aria-label="Payment method">
-                        <button
-                          className={rail === "upi" ? "selected" : ""}
-                          onClick={() => setRail("upi")}
-                        >
-                          <Zap size={13} />
-                          UPI
-                        </button>
-                        <button
-                          className={rail === "card" ? "selected" : ""}
-                          onClick={() => setRail("card")}
-                        >
-                          <CreditCard size={13} />
-                          Card
-                        </button>
-                      </div>
-                    </div>
-                    <div className="service-grid">
-                      {data.services.map((s, i) => (
-                        <article className="service-card" key={s.id}>
-                          <div className="service-card-top">
-                            <span className={`service-icon service-${i}`}>
-                              {i === 0 ? (
-                                <Sparkles size={20} />
-                              ) : i === 1 ? (
-                                <Globe size={20} />
-                              ) : i === 2 ? (
-                                <ArrowUpRight size={20} />
-                              ) : (
-                                <LockKeyhole size={20} />
-                              )}
-                            </span>
-                            <span className="service-tag">
-                              {s.id === "premium"
-                                ? "Limit check"
-                                : !a.allowedServices.includes(s.id)
-                                  ? "Not approved"
-                                  : s.category}
-                            </span>
-                          </div>
-                          <h3>{s.name}</h3>
-                          <p>{s.description}</p>
-                          <footer>
-                            <strong>{money(s.amount)}</strong>
-                            <button
-                              disabled={!writable || !!busy}
-                              onClick={() => buy(s.id)}
-                            >
-                              {busy === s.id ? (
-                                <LoaderCircle size={15} className="spin" />
-                              ) : (
-                                <>
-                                  Request
-                                  <ArrowUpRight size={14} />
-                                </>
-                              )}
-                            </button>
-                          </footer>
-                        </article>
-                      ))}
-                    </div>
-                    <div className="panel-footnote">
-                      <LockKeyhole size={13} />
-                      {data.mode === "razorpay_live"
-                        ? "Live purchases charge real money after you confirm in Razorpay checkout."
-                        : "Sample services for this event. Rehearsal and test payments move no real money."}
-                    </div>
-                  </section>
                   {notice && (
                     <div
                       className={`alert ${selected?.payment.status === "blocked" ? "warning" : "success"}`}
@@ -608,9 +481,6 @@ export default function Home() {
                           Purchase ledger{" "}
                           <span className="count">{data.payments.length}</span>
                         </h2>
-                        <p>
-                          Decisions and outcomes, attached to the same identity.
-                        </p>
                       </div>
                       <button
                         className="icon-button"
@@ -624,10 +494,6 @@ export default function Home() {
                       <div className="empty-state">
                         <Wallet size={24} />
                         <strong>Your first purchase starts here</strong>
-                        <p>
-                          Request a service above, or ask Hermes to make a
-                          purchase.
-                        </p>
                       </div>
                     ) : (
                       <div className="table-wrap">
@@ -732,10 +598,6 @@ export default function Home() {
                       <ShieldCheck size={21} />
                       <h3>Owner controls</h3>
                     </div>
-                    <p>
-                      Pause new spending instantly. Existing provider orders
-                      remain accounted for.
-                    </p>
                     <button
                       className={`button ${a.status === "active" ? "danger-outline" : "secondary"}`}
                       disabled={!writable || !!busy}
@@ -767,17 +629,12 @@ export default function Home() {
                       <RefreshCw size={13} />
                       Rotate funding reference
                     </button>
-                    <small>
-                      Reference rotation demonstrates identity continuity; it
-                      does not rotate bank or card credentials.
-                    </small>
                   </section>
                 </div>
               </div>
               <footer className="dashboard-footer">
                 <span>
                   <Fingerprint size={15} />
-                  AgentPass · Built for BuildX
                 </span>
                 <span>
                   {data.storage === "postgres"
@@ -812,10 +669,6 @@ export default function Home() {
                   <KeyRound />
                 </span>
                 <h2>Owner access</h2>
-                <p>
-                  Enter the private access code from your event setup to manage
-                  the connected agent.
-                </p>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -851,10 +704,6 @@ export default function Home() {
                   <SlidersHorizontal />
                 </span>
                 <h2>Spending policy</h2>
-                <p>
-                  Rules are enforced before a payment order is created. Amounts
-                  below are in rupees.
-                </p>
                 <form onSubmit={policy}>
                   <label>
                     Agent name
@@ -919,17 +768,9 @@ export default function Home() {
                   <Terminal />
                 </span>
                 <h2>Bring your Hermes agent</h2>
-                <p>
-                  Use the event profile to connect Hermes to this workspace.
-                  Your usual Hermes setup stays untouched.
-                </p>
                 <ol className="setup-list">
                   <li>
                     <strong>Set up the event credentials</strong>
-                    <span>
-                      Follow SETUP.md in the repository. Only the scoped agent
-                      token is given to Hermes.
-                    </span>
                   </li>
                   <li>
                     <strong>Launch the isolated profile</strong>
@@ -943,11 +784,6 @@ export default function Home() {
                     </blockquote>
                   </li>
                 </ol>
-                <p className="fine-print">
-                  Hermes requests purchases. You confirm UPI or card payments in
-                  Razorpay. The agent never receives your UPI PIN or card
-                  details.
-                </p>
                 <a
                   className="button primary"
                   href="https://github.com/Arkane-o7/BuildX-Buildonomics"
@@ -1057,10 +893,6 @@ export default function Home() {
                           : "Signature invalid."}
                       </div>
                     )}
-                    <p className="fine-print">
-                      A signed receipt proves the recorded outcome has not
-                      changed. It does not prove current spending authority.
-                    </p>
                   </>
                 )}
               </>
