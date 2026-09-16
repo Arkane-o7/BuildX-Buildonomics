@@ -3,7 +3,7 @@ import { z } from "zod";
 import { checkOrigin, digest } from "@/lib/auth";
 import { AppError, loginAllowed } from "@/lib/store";
 import { createAccount, accountByEmail, readAccount, updateAccount } from "@/lib/platform-store";
-import { authorizeIntent, bindWallet, checkPassword, controlEvent, createManagedAgent, currentAuthority, customerCookie, hashPassword, principal, publicAccount, reportOrder, scopedAgent, signedRecord, tokenFor } from "@/lib/platform";
+import { authorizeIntent, bindWallet, checkPassword, controlEvent, createManagedAgent, currentAuthority, customerCookie, hashPassword, listAvatars, principal, publicAccount, reportOrder, scopedAgent, signedRecord, tokenFor } from "@/lib/platform";
 import { receiptPublicKey, verifyReceipt } from "@/lib/receipts";
 import type { OwnerAccount } from "@/lib/platform-types";
 
@@ -51,12 +51,14 @@ async function handler(req: Request): Promise<Response> {
       return json(currentAuthority(await readAccount(input.payload.accountId as string), input));
     }
     if (req.method === "GET" && route === "public-key") return json({ publicKey: receiptPublicKey(), algorithm: "Ed25519" });
+    if (req.method === "GET" && route === "avatars") return json({ avatars: await listAvatars() });
     const agentRoutes = ["passport", "authorize", "intents", "report"];
     const auth = await principal(req, !agentRoutes.includes(route));
     if (req.method === "GET" && route === "account") return json({ account: publicAccount(await readAccount(auth.accountId)) });
     if (post && route === "agents") {
-      const input = z.object({ name: z.string().trim().min(1).max(60), runtime: z.string().trim().min(1).max(60) }).strict().parse(await body(req));
-      return json(await updateAccount(auth.accountId, a => createManagedAgent(a, input.name, input.runtime)));
+      const avatars = await listAvatars();
+      const input = z.object({ name: z.string().trim().min(1).max(60), runtime: z.string().trim().min(1).max(60), avatar: z.string().refine(v => avatars.includes(v), "Choose a valid sprite.") }).strict().parse(await body(req));
+      return json(await updateAccount(auth.accountId, a => createManagedAgent(a, input.name, input.runtime, input.avatar)));
     }
     if (post && /^agents\/[^/]+\/(policy|binding|revoke|resume|token)$/.test(route)) {
       const [, id, action] = route.split("/");

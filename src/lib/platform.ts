@@ -1,10 +1,27 @@
 import { randomBytes, randomUUID, scrypt, sign } from "node:crypto";
+import { readdir } from "node:fs/promises";
+import path from "node:path";
 import { promisify } from "node:util";
 import { digest, same, signToken } from "./auth";
 import { AppError } from "./store";
 import { readAccount } from "./platform-store";
 import { canonical, receiptPublicKey, verifyReceipt } from "./receipts";
 import type { OwnerAccount, ManagedAgent, PublicAccount, PurchaseIntent, SignedRecord } from "./platform-types";
+
+export const DEFAULT_AVATAR = "agent-avatar-crab.gif";
+export function effectiveAvatar(agent: Pick<ManagedAgent, "avatar">) {
+  return agent.avatar || DEFAULT_AVATAR;
+}
+// Scanned at request time so dropping a new .gif into public/ makes it selectable with no code change.
+export async function listAvatars(): Promise<string[]> {
+  try {
+    const files = await readdir(path.join(process.cwd(), "public"));
+    const gifs = files.filter(f => /\.gif$/i.test(f)).sort();
+    return gifs.length ? gifs : [DEFAULT_AVATAR];
+  } catch {
+    return [DEFAULT_AVATAR];
+  }
+}
 
 const derive = promisify(scrypt);
 export async function hashPassword(password: string) {
@@ -45,7 +62,7 @@ export async function principal(req: Request, ownerOnly = false): Promise<Princi
   throw new AppError(401, "Sign in to your AgentPass account.");
 }
 export function publicAccount(account: OwnerAccount): PublicAccount {
-  return { ...account, agents: account.agents.map(({ tokenHash, ...agent }) => { void tokenHash; return agent; }) };
+  return { ...account, agents: account.agents.map(({ tokenHash, ...agent }) => { void tokenHash; return { ...agent, avatar: effectiveAvatar(agent) }; }) };
 }
 export function controlEvent(account: OwnerAccount, type: string, detail: string, agentId?: string) {
   account.events.unshift({ id: randomUUID(), time: new Date().toISOString(), type, detail, ...(agentId ? { agentId } : {}) });
@@ -54,10 +71,12 @@ export function controlEvent(account: OwnerAccount, type: string, detail: string
 export function tokenFor(accountId: string, agentId: string) {
   return `ap1.${accountId}.${agentId}.${randomBytes(32).toString("base64url")}`;
 }
-export function createManagedAgent(account: OwnerAccount, name: string, runtime: string) {
+export function createManagedAgent(account: OwnerAccount, name: string, runtime: string, avatar: string) {
   if (account.agents.length >= 10) throw new AppError(429, "The event trial supports up to ten agents.");
+  const taken = new Set(account.agents.filter(a => a.status === "active").map(effectiveAvatar));
+  if (taken.has(avatar)) throw new AppError(409, "That sprite is already used by another active agent. Choose a different one.");
   const id = randomUUID(), token = tokenFor(account.id, id);
-  const agent: ManagedAgent = { id, name, runtime, status: "active", walletId: null, bindingVersion: 1, policyVersion: 1, budget: 200000, perPurchase: 80000, allowedMerchants: ["amazon.in"], spent: 0, reserved: 0, tokenHash: digest(token), createdAt: new Date().toISOString(), lastSeen: null };
+  const agent: ManagedAgent = { id, name, runtime, avatar, status: "active", walletId: null, bindingVersion: 1, policyVersion: 1, budget: 200000, perPurchase: 80000, allowedMerchants: ["amazon.in"], spent: 0, reserved: 0, tokenHash: digest(token), createdAt: new Date().toISOString(), lastSeen: null };
   account.agents.push(agent);
   controlEvent(account, "identity", `${name} registered with an owner-attested identity.`, id);
   return { agent: publicAccount({ ...account, agents: [agent] }).agents[0], token };

@@ -13,6 +13,7 @@ export interface ManagedAgent {
   id: string;
   name: string;
   runtime: string;
+  avatar: string;
   status: "active" | "revoked";
   walletId: string | null;
   bindingVersion: number;

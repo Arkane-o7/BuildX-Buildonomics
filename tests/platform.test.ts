@@ -19,7 +19,7 @@ before(() => {
 after(() => { process.chdir(original); rmSync(dir,{recursive:true,force:true}); });
 function fixture() {
  const a:OwnerAccount={id:randomUUID(),name:'Owner',email:randomUUID()+'@example.com',createdAt:new Date().toISOString(),subscription:{plan:'event_trial',status:'trial',billingConnected:false},agents:[],wallets:[],intents:[],events:[]};
- const {agent,token}=createManagedAgent(a,'Atlas','Hermes');
+ const {agent,token}=createManagedAgent(a,'Atlas','Hermes','agent-avatar-crab.gif');
  a.wallets.push({id:randomUUID(),label:'Example account',kind:'upi',maskedReference:'de•••@bank',connection:'reference_only',createdAt:new Date().toISOString()});
  bindWallet(a,a.agents[0],a.wallets[0].id);
  return {a,agent:a.agents[0],token,auth:{accountId:a.id,agentId:agent.id,tokenHash:digest(token)},input:{agentId:agent.id,requestId:'umbrella-001',item:'Example umbrella',url:'https://www.amazon.in/dp/EXAMPLE',amount:49900}};
@@ -61,10 +61,17 @@ test('current authority rejects tampering, policy changes, expiry and revocation
 test('credentials isolate owners and agents and owner-only routes reject bearer tokens',async()=>{
  const {a,token,auth,input}=fixture(); await createAccount(a,'unused'); const b=fixture();
  assert.throws(()=>authorizeIntent(b.a,auth,{...b.input}),/cannot access/);
- const other=createManagedAgent(a,'Other','Hermes'); assert.throws(()=>authorizeIntent(a,auth,{...input,agentId:other.agent.id}),/cannot access/);
+ const other=createManagedAgent(a,'Other','Hermes','bori-waving.gif'); assert.throws(()=>authorizeIntent(a,auth,{...input,agentId:other.agent.id}),/cannot access/);
  const req=new Request('https://app.test',{headers:{authorization:'Bearer '+token}}); assert.equal((await principal(req)).agentId,auth.agentId); await assert.rejects(principal(req,true),/owner/);
  await updateAccount(a.id,s=>{s.agents[0].tokenHash=digest('rotated');}); await assert.rejects(principal(req),/rotated/);
  assert.ok(!JSON.stringify(publicAccount(a)).includes('tokenHash'));
+});
+test('agent sprites must be unique among active agents, and revoking one frees its sprite',()=>{
+ const {a,agent}=fixture();
+ assert.throws(()=>createManagedAgent(a,'Duplicate','Hermes','agent-avatar-crab.gif'),/already used/);
+ const second=createManagedAgent(a,'Second','Hermes','bori-waving.gif').agent; assert.equal(second.avatar,'bori-waving.gif');
+ agent.status='revoked';
+ const third=createManagedAgent(a,'Third','Hermes','agent-avatar-crab.gif').agent; assert.equal(third.avatar,'agent-avatar-crab.gif');
 });
 test('order reports are idempotent client evidence, never settlement proofs',()=>{
  const {a,agent,auth,input}=fixture(); const i=authorizeIntent(a,auth,input); reportOrder(a,auth,i.id,'EXAMPLE-ORDER'); reportOrder(a,auth,i.id,'EXAMPLE-ORDER');
