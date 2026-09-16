@@ -75,7 +75,13 @@ For cards, choose **Card** before requesting. Card entry and any issuer authenti
 
 For provider test mode, use separate `rzp_test_…` keys and `PAYMENT_MODE=razorpay_test`. Test UPI is not a real bank transfer. Never mix test/live credentials. Complete or reconcile outstanding orders before switching environments; keep historical keys securely available if old orders still need reconciliation.
 
-**If activation is pending:** use the explicitly labeled rehearsal for the product showcase. It demonstrates actual policy, persistence, Hermes tools and signed receipts, but does not prove real UPI or card processing. A personal UPI QR is not a substitute for provider-verified automated settlement.
+**If activation is pending:** use Razorpay Test Mode to exercise the provider integration without completing live KYC. Set the test key pair and `PAYMENT_MODE=razorpay_test` in `.env.local`, run `npm run env:publish`, and redeploy with `vercel --prod --yes`. Use owner access or Hermes for the provider checkout; **Try interactive demo** intentionally remains a separate rehearsal workspace.
+
+In Razorpay **Test Mode**, open **Account & Settings → Webhooks → Add New Webhook**. Set the URL to `https://agentpass-buildx.vercel.app/api/webhooks/razorpay`, select `payment.captured`, and use the same `RAZORPAY_WEBHOOK_SECRET` as the deployed server. If the local private file `.agentpass-private/RAZORPAY-WEBHOOK.txt` exists, it contains the event's webhook settings. Keep its secret private. Configure automatic capture: the app only completes orders after Razorpay reports `captured`.
+
+For the supported UPI-ID test flow, Razorpay documents `success@razorpay` and `failure@razorpay`. Availability depends on the checkout surface; these are simulator inputs, not bank accounts to pay from a real UPI app. Razorpay warns that test UPI cancellation can report success, so use the explicit failure ID for a failure demonstration. See [test UPI details](https://razorpay.com/docs/payments/payments/test-upi-details/) and [test-mode eligibility](https://razorpay.com/docs/payments/quickstart/).
+
+If provider test checkout is unavailable, the explicitly labeled rehearsal still demonstrates policy, persistence, Hermes tools and signed receipts. Neither rehearsal nor provider test mode proves real money movement. A personal UPI QR is not a substitute for provider-verified settlement.
 
 Official references: [Create an account](https://razorpay.com/docs/payments/create-account/), [API keys](https://razorpay.com/docs/payments/dashboard/account-settings/api-keys/), [UPI methods](https://razorpay.com/docs/payments/payment-methods/upi/), [Standard Checkout](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/).
 

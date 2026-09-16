@@ -262,9 +262,9 @@ export default function CheckoutPage({
               ) : (
                 <>
                   <p>
-                    Continue to Razorpay to confirm using your{" "}
-                    {p.rail === "upi" ? "UPI app or QR code" : "card"}.
-                    AgentPass never receives your PIN or card details.
+                    {p.mode === "razorpay_test"
+                      ? "Use Razorpay’s test payment details in the sandbox checkout. No real money moves; do not pay using a real UPI app or enter real card details."
+                      : `Continue to Razorpay to confirm using your ${p.rail === "upi" ? "UPI app or QR code" : "card"}. AgentPass never receives your PIN or card details.`}
                   </p>
                   <button
                     className="button primary"

@@ -4,7 +4,7 @@ Keep the public dashboard open in one window and the isolated Hermes session in 
 
 1. **Identity:** show Atlas's AgentPass ID, owner, funding reference and configured budget. Explain that this is an owner-issued identity, not verified KYC or a blockchain registry.
 2. **Ask Hermes to buy:** check passport, list services, then request `research` using UPI and a stable request ID. Show the new activity, reserved budget and payer-confirmation status.
-3. **Confirm checkout:** the human opens the returned link. In live mode they pay through Razorpay. In rehearsal choose “Simulate success” and explicitly say no money moved. After confirmation, Hermes queries status to retrieve the sample content and receipt.
+3. **Confirm checkout:** the human opens the returned link. In Razorpay test mode, complete the provider checkout using its official test credentials and explain that no money moves. Confirm the captured test payment and matching provider reference. In live mode the payer pays through Razorpay. In rehearsal choose “Simulate success” and explicitly identify it as the local simulation. After confirmation, Hermes queries status to retrieve the sample content and receipt.
 4. **Prove the receipt:** open purchase details, verify its signature, and export its JSON. The receipt records the actual payment environment and provider reference when present.
 5. **Show a refusal:** request the ₹1,500 report under the default ₹500 per-purchase cap. Then request the unapproved service. Both should be blocked before a provider order is made.
 6. **Owner control:** revoke authority and ask Hermes to make another request. Show the denial. Restore authority when finished.
