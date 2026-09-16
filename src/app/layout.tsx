@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "AgentPass — Authority to act",
   description:
-    "A spending control room for your AI agents. Connect Hermes, set budgets, and observe UPI and card purchase requests.",
+    "Identity, payment-account bindings and spending authority for your AI agents. Connect your runtime with the AgentPass plugin.",
 };
 
 export default function RootLayout({

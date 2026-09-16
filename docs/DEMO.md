@@ -1,15 +1,27 @@
-# Five-minute event showcase
+# Present the actual AgentPass control plugin
 
-Keep the public dashboard open in one window and the isolated Hermes session in another. Use owner access for the connected workspace; the public interactive demo creates a separate simulated workspace.
+Open your customer dashboard. Register Atlas, add an **example** payment-account reference, bind it, and set a ₹2,000 allowance, ₹800 purchase cap and `amazon.in` allowlist. Connect the scoped credential with `npm run plugin:configure` and start `npm run hermes:platform`.
 
-1. **Identity:** show Atlas's AgentPass ID, owner, funding reference and configured budget. Explain that this is an owner-issued identity, not verified KYC or a blockchain registry.
-2. **Ask Hermes to buy:** check passport, list services, then request `research` using UPI and a stable request ID. Show the new activity, reserved budget and payer-confirmation status.
-3. **Confirm checkout:** the human opens the returned link. In Razorpay test mode, complete the provider checkout using its official test credentials and explain that no money moves. Confirm the captured test payment and matching provider reference. In live mode the payer pays through Razorpay. In rehearsal choose “Simulate success” and explicitly identify it as the local simulation. After confirmation, Hermes queries status to retrieve the sample content and receipt.
-4. **Prove the receipt:** open purchase details, verify its signature, and export its JSON. The receipt records the actual payment environment and provider reference when present.
-5. **Show a refusal:** request the ₹1,500 report under the default ₹500 per-purchase cap. Then request the unapproved service. Both should be blocked before a provider order is made.
-6. **Owner control:** revoke authority and ask Hermes to make another request. Show the denial. Restore authority when finished.
-7. **Identity continuity:** rotate the funding reference and show the same AgentPass ID, budget and historical receipt. Explain that actual bank/card token rotation is future work.
+## Identity and authorization demo
 
-The defensible claim: “We implemented owner-issued agent identity, spending policy, persistent audit, payer-mediated UPI/card integration and verifiable receipts.” Only claim a rail is verified live after an actual captured provider payment has been checked.
+Use this exact prompt. The product/URL is intentionally a test fixture, not a researched or buyable product:
 
-Do not claim arbitrary merchant acceptance, autonomous UPI PIN entry, bank/card issuing, production accounting, decentralized identity, live payments from a test receipt, or real payment-credential rotation.
+> Check my AgentPass passport. For this authorization-only test, use item "Demo umbrella", URL https://www.amazon.in/dp/EXAMPLE, final total ₹499 including delivery, request ID umbrella-policy-001. Request authorization and show the decision. Do not place an order or claim that payment happened.
+
+The agent should call `passport` then `authorize_purchase`. The dashboard shows ₹499 reserved, an exact purchase intent and a signed authorization. It must say no payment was executed.
+
+Repeat the identical request: there must be one reservation, not two. Change the amount using the same request ID: it must reject the conflicting intent. Try ₹900 under a new request ID: it must be blocked by the ₹800 cap.
+
+## Revocation and account replacement
+
+Tell Hermes to verify the intent's current authority. Revoke Atlas in the dashboard; verify again and see `authorized:false` while the historical signature remains authentic. Restore authority and switch its payment-account reference. The agent identity and spending history remain unchanged; the old proof stays invalid.
+
+Reservations stay held after expiry/revocation/rebinding until the owner confirms no payment occurred. Inspect an intent under **Activity** to explicitly release it. This never cancels an external order.
+
+## What the shopping flow still needs
+
+For a real product, use Hermes with its existing browser/commerce tools plus the AgentPass MCP entry. Ask it to find an umbrella, observe the merchant's exact final price and request authorization. The isolated launcher has no browser tools and must not invent product information.
+
+This build cannot automatically debit UPI/cards, so the payment execution step is not part of this demo. `report_order` records only a real, observed merchant order reference and labels it client-reported/unverified. Do not fabricate a reference to make the demo look paid.
+
+The trial subscription screen demonstrates SaaS account separation, not a paid billing integration. Real subscription billing and delegated payment execution remain separate outstanding integrations.

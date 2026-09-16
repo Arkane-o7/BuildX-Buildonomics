@@ -17,7 +17,13 @@
     "hermes:remove-event": "python3 scripts/hermes-event.py remove",
     "env:publish": "tsx scripts/publish-env.ts",
     "db:import": "tsx scripts/import-database.ts",
-    "mcp:check": "tsx scripts/mcp-smoke.ts"
+    "mcp:check": "tsx scripts/mcp-smoke.ts",
+    "plugin:configure": "python3 scripts/platform-plugin.py configure",
+    "plugin:mcp": "python3 scripts/platform-plugin.py mcp",
+    "hermes:platform": "python3 scripts/platform-plugin.py run",
+    "hermes:prepare-platform": "python3 scripts/platform-plugin.py prepare",
+    "hermes:remove-platform": "python3 scripts/platform-plugin.py remove",
+    "plugin:check": "tsx scripts/platform-mcp-check.ts"
   },
   "dependencies": {
     "next": "^16.2.1",

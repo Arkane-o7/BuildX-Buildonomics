@@ -26,7 +26,7 @@ Run `npm run hermes:remove-event -- --yes`. It deletes only the project-owned `.
 
 **4. Remove event storage**
 
-Export any receipts you want to retain. Delete the Neon database/project only if it was created exclusively for this event. If you used a shared database, remove only the `agentpass_workspaces` and `agentpass_login_attempts` tables after confirming they are event-owned. Do not drop a shared schema or database.
+Export any receipts you want to retain. Delete the Neon database/project only if it was created exclusively for this event. If you used a shared database, remove only the `agentpass_accounts`, `agentpass_workspaces` and `agentpass_login_attempts` tables after confirming they are event-owned. Do not drop a shared schema or database.
 
 Payments recorded by a payment provider cannot be erased by deleting this app. Any live payment, refund or mandate requires the provider's normal process. The prototype defaults to rehearsal or provider test mode.
 
@@ -45,3 +45,14 @@ Normal Hermes model/provider configuration, normal Hermes MCP servers and person
 **Resource ledger**
 
 The build will record event resources in `.agentpass-private/event-resources.json` and list non-secret identifiers in the final setup guide. Only resources explicitly recorded as created for this event should be removed.
+
+
+## Customer-platform rebuild
+
+The customer platform preserves the earlier checkout experiment at `/lab`. The Git baseline before the rebuild is `95856a3`. To inspect it without discarding new work, use `git worktree add ../AgentPass-before-platform 95856a3`. Do not reset a working directory with uncommitted changes.
+
+Stop `npm run hermes:platform`, then run `npm run hermes:remove-platform -- --yes`. This removes only the marked `.hermes-platform` profile. Your original `~/.hermes` is not edited. If you manually merged the generated MCP configuration into your normal client, remove only that `agentpass` entry, preserving the other entries.
+
+Rotate/revoke customer agent credentials in the workspace. After exporting anything needed, delete the local `.agentpass-private/platform-plugin.json`, `agentpass-mcp.json`, `PLATFORM-DEMO.json` and local `customer-accounts.json` if present. They contain private credentials or customer data. Remove `agentpass_accounts` only if all its data belongs to this event. The global `EVENT_DISABLED=true` switch disables both the customer and legacy APIs after redeployment.
+
+An earlier Razorpay recurring-payment capability probe created a **test** customer and authorization order, tracked in `.agentpass-private/autopay-probe.json`. No successful mandate was established. Its local HTML and provider documentation are private, ignored experiment files. The local probe server was stopped. Do not confuse those resources with the customer SaaS or with an active UPI/card funding connection.

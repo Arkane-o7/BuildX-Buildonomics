@@ -1,25 +1,32 @@
 # AgentPass
 
-Public showcase: **https://agentpass-buildx.vercel.app**
+**Identity, payment-account bindings and spending authority for AI agents.** A subscription SaaS with an MCP plugin for Hermes and other agent runtimes.
 
-An identity and spending-control layer for AI agents, with a public observation dashboard, Hermes integration, UPI/card checkout, and signed purchase receipts. Built for BuildX.
+[Public app](https://agentpass-buildx.vercel.app) · [Setup](SETUP.md) · [Demo](docs/DEMO.md) · [Product contract](docs/PRODUCT.md) · [Removal](docs/ROLLBACK.md)
 
-**Start here:** [Setup guide](SETUP.md) · [Event demo](docs/DEMO.md) · [Removal and restoration](docs/ROLLBACK.md)
+The customer owns the agents and their payment accounts. AgentPass registers identities, binds accounts, enforces purchase-request budgets, issues signed authorizations and supports revocation. Shopping happens through the agent's existing merchant/browser tools. AgentPass subscription billing is separate from purchases at Amazon or other merchants.
 
-## What works
+## Working in this build
 
-- Stable owner-attested agent identity with a scoped agent API token.
-- Atomic spending reservations, total allowance, per-purchase cap, service allowlist and owner revocation.
-- Hosted Razorpay checkout for UPI and cards, with separate rehearsal, provider test and live environments.
-- Provider payment verification: server-owned order ID, callback HMAC, independent payment fetch, exact amount/currency matching and captured status.
-- Signed webhook handling and reconciliation of uncertain provider orders.
-- Ed25519 receipts, signature verification and JSON export.
-- Dashboard with purchase ledger, activity stream, owner controls and isolated public rehearsal sessions.
-- Four MCP tools for Hermes, installed into a separate removable event profile.
+- Separate customer workspaces with sign-in and a free event-trial entitlement.
+- Multiple stable, owner-attested agent identities and individually scoped, rotatable credentials.
+- Masked UPI/card references, rebindable without resetting identity, spending or history.
+- External merchant allowlists, total/per-purchase limits, atomic reservations and exact-intent idempotency.
+- Signed authorizations for the merchant, item, URL and total; online verification checks current revocation, policy, binding and expiry.
+- MCP tools: `passport`, `authorize_purchase`, `purchase_history`, `verify_authority`, `report_order`.
+- Owner dashboard for agents, account bindings, policies, activity, plugin setup and subscription status.
 
-## Local development
+## Explicit capability boundaries
 
-Requires Node.js 22+, npm and Python 3 with PyYAML for the optional Hermes launcher.
+**Automatic UPI/card payment execution is not connected.** Account references are not funded wallets or debit authority. No customer Razorpay merchant account is needed to use this control plane. A real delegated payment adapter must be integrated before AgentPass can execute a purchase. This build does not purchase from Amazon by itself.
+
+**Paid subscriptions are not connected.** The trial costs ₹0; there is no pretend paid plan. Production billing needs a separate subscription integration and verified billing webhooks.
+
+Owner-attested identity is not KYC. A signed authorization is not a payment receipt. Client-reported orders are labelled unverified; no provider settlement is inferred. Policy is enforceable at the AgentPass authorization boundary, not against an agent with independent access to funds through other tools.
+
+The earlier sample-research merchant experiment is preserved at `/lab` with separate legacy endpoints/storage and [historical documentation](docs/LEGACY-MERCHANT-README.md). It is not the AgentPass customer product. Its payment tests do not demonstrate autonomous external shopping.
+
+## Development
 
 ```sh
 npm ci
@@ -27,7 +34,14 @@ npm run setup
 npm run dev
 ```
 
-Open http://localhost:3000 and choose **Try interactive demo**. No external account is required for local rehearsal. Owner access is in the ignored `.agentpass-private/OWNER-ACCESS.txt` file. Production requires Postgres; local development can use a private JSON file.
+Create a customer account at http://localhost:3000. Set up an agent, add an account reference and bind it. Then:
+
+```sh
+npm run plugin:configure
+npm run hermes:platform
+```
+
+The isolated Hermes profile tests the control plugin. For shopping, merge the generated MCP entry into a runtime that already has browser/commerce tools. Original Hermes configuration remains unchanged by the launcher.
 
 ```sh
 npm test
@@ -35,20 +49,8 @@ npm run typecheck
 npm run build
 ```
 
-## Payment scope
+Node 22+, Next.js, React, Neon/Postgres and the MCP SDK. Amounts are integer paise. `agentpass_accounts` isolates each customer's JSONB state; row locks serialize mutations. Local development uses an ignored private JSON file when no database is configured. Production requires Postgres.
 
-The prototype collects payment at the connected Razorpay merchant for its integrated sample services. It is **not** an issuer of bank accounts/cards, a wallet custodian, or a way to spend at arbitrary external merchants. UPI and card payments require the human payer's confirmation in hosted checkout. AgentPass never receives card PAN/CVV or UPI PINs.
+## Before a production launch
 
-`PAYMENT_MODE=rehearsal` simulates outcomes, `razorpay_test` uses test keys and `razorpay_live` uses an activated merchant's live keys. Public interactive demos always stay in rehearsal, even when the owner workspace is live. Real payment verification remains dependent on activated provider credentials and a payer completing checkout.
-
-Funding reference rotation demonstrates that identity and history can survive a binding change. It **does not rotate actual bank/card credentials**. This prototype uses an owner-issued identity; it does not implement ERC-8004, government identity verification or provider-independent trust.
-
-## Implementation
-
-![Implemented payment flow](docs/agentpass-architecture.svg)
-
-Next.js App Router + React, Postgres (Neon on Vercel), Razorpay REST/Standard Checkout, MCP SDK and Node crypto. INR amounts are integer paise. A transaction locks a workspace row before admitting requests, so concurrent serverless functions share one authoritative spending ledger. The small event dataset is stored as JSONB; this is intentionally an event prototype, not a general-purpose payments accounting platform.
-
-Reservations are not released merely because a checkout tab closes or a provider request times out. The provider may have accepted the payment. Reconcile first. Revocation blocks new requests; previously issued provider orders may still settle and remain included in the budget.
-
-The early crypto research in `docs/agentpass-assessment.md` is background only. The implemented scope is documented here and in `SETUP.md`.
+Connect a supported delegated payment provider with server-side execution and independently verified settlement; implement paid subscription checkout, webhooks and entitlements; add verified email, recovery, session management and operational monitoring; strengthen issuer key rotation, database migrations and audit retention; and exercise adversarial/runtime-bypass cases. See [PRODUCT.md](docs/PRODUCT.md) for the intended product boundary.

@@ -68,7 +68,11 @@ export function requireWrite(req: Request, ownerOnly = false): Auth {
 }
 export function checkOrigin(req: Request) {
   const origin = req.headers.get("origin");
-  if (!origin || origin !== new URL(req.url).origin)
+  // Next's local server can normalize req.url to localhost even when the
+  // browser used 127.0.0.1. Host retains the actual browser-facing authority.
+  const url = new URL(req.url);
+  const expected = `${url.protocol}//${req.headers.get("host") || url.host}`;
+  if (!origin || origin !== expected)
     throw new AppError(403, "Request origin could not be verified.");
 }
 export function checkoutToken(workspace: string, payment: string) {
