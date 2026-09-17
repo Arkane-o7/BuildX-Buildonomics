@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 export function ConnectPhone() {
   return <Dialog>
-    <DialogTrigger render={<SidebarMenuButton tooltip="Connect phone" />}><Smartphone /><span>Connect phone</span></DialogTrigger>
+    <DialogTrigger render={<SidebarMenuButton aria-label="Connect phone" tooltip="Connect phone" />}><Smartphone /><span>Connect phone</span></DialogTrigger>
     <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
       <DialogHeader><div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-muted"><Smartphone className="size-5" /></div><DialogTitle>Get AgentPass on your phone</DialogTitle><DialogDescription>Scan to sign in and receive payment requests.</DialogDescription></DialogHeader>
       <div className="mx-auto rounded-xl bg-white p-4"><img src="/connect-phone-qr.svg" width={224} height={224} alt="QR code for AgentPass mobile sign-in" /></div>

@@ -83,36 +83,36 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.432 0.095 166.913);
-  --primary-foreground: oklch(0.979 0.021 166.113);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #111113;
+  --foreground: #f4f4f5;
+  --card: #1b1b1e;
+  --card-foreground: #f4f4f5;
+  --popover: #1b1b1e;
+  --popover-foreground: #f4f4f5;
+  --primary: #047857;
+  --primary-foreground: #ffffff;
+  --secondary: #242427;
+  --secondary-foreground: #f4f4f5;
+  --muted: #242427;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #f4f4f5;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border: #2b2b30;
+  --input: #3f3f46;
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.871 0.15 154.449);
   --chart-2: oklch(0.723 0.219 149.579);
   --chart-3: oklch(0.627 0.194 149.214);
   --chart-4: oklch(0.527 0.154 150.069);
   --chart-5: oklch(0.448 0.119 151.328);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar: #151517;
+  --sidebar-foreground: #f4f4f5;
   --sidebar-primary: oklch(0.696 0.17 162.48);
   --sidebar-primary-foreground: oklch(0.262 0.051 172.552);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-accent: #1c2d27;
+  --sidebar-accent-foreground: #6ee7b7;
+  --sidebar-border: #2b2b30;
   --sidebar-ring: oklch(0.556 0 0);
 }
 
@@ -128,3 +128,67 @@
   }
 }
 @layer base { .dark { color-scheme: dark; } button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; } }
+
+/* Workspace surfaces are scoped so the public pages retain their own identity. */
+.workspace-shell {
+  --background: #f7f7f8;
+  --card: #ffffff;
+  --sidebar: #ffffff;
+  --sidebar-accent: #e9f5ef;
+  --sidebar-accent-foreground: #047857;
+  --sidebar-border: #e4e4e7;
+  --border: #e4e4e7;
+  --primary: #047857;
+  --primary-foreground: #ffffff;
+  --ring: #10b981;
+  --radius: .65rem;
+  background: var(--background);
+}
+.dark .workspace-shell {
+  --background: #111113;
+  --card: #1b1b1e;
+  --sidebar: #151517;
+  --sidebar-accent: #1c2d27;
+  --sidebar-accent-foreground: #6ee7b7;
+  --sidebar-border: #2b2b30;
+  --border: #2b2b30;
+  --muted: #242427;
+  --muted-foreground: #a1a1aa;
+  --foreground: #f4f4f5;
+  --primary: #047857;
+  --primary-foreground: #ffffff;
+}
+.workspace-shell [data-slot="sidebar-inset"] { background: var(--background); }
+.workspace-shell [data-slot="sidebar-menu-button"] { height: 39px; padding-inline: 12px; border-radius: 7px; font-size: 13px; }
+.workspace-shell [data-slot="sidebar-menu-button"][data-active="true"] { box-shadow: inset 2px 0 #10b981; }
+.workspace-shell [data-slot="sidebar-group"] { padding-inline: 14px; }
+.workspace-shell [data-slot="sidebar-group-label"] { font-size: 10px; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 7px; }
+.workspace-shell [data-slot="sidebar-header"] { padding-bottom: 24px; }
+.workspace-shell [data-slot="sidebar-inset"] > header { height: 65px; background: var(--sidebar); }
+
+/* Keep the compact rail on one centerline, independent of expanded padding. */
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-header"] {
+  height: 65px;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-group"],
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-footer"] {
+  padding: 8px;
+}
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-group-label"] {
+  display: none;
+}
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-menu"] {
+  align-items: center;
+  gap: 8px;
+}
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-menu-button"] {
+  justify-content: center;
+  gap: 0;
+}
+.workspace-shell [data-collapsible="icon"] [data-slot="sidebar-menu-button"] > span {
+  display: none;
+}

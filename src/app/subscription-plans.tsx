@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, ArrowRight, Building2, Check, ChevronDown, Fingerprint, Layers3, ShieldCheck, Terminal, X } from "lucide-react";
+import { ArrowRight, Building2, Check, ChevronDown, Fingerprint, Layers3, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -32,36 +32,6 @@ const plans = [
   },
 ] as const;
 
-const comparison = [
-  { group: "Capacity", rows: [
-    ["Enabled agents", "10", "50", "Custom"],
-    ["Authorization requests / month", "5,000", "25,000", "Custom"],
-    ["Human reviewers", "Unlimited", "Unlimited", "Unlimited"],
-    ["Activity history", "90 days", "1 year", "Custom"],
-  ] },
-  { group: "Core spending controls", rows: [
-    ["Identities, credentials & account bindings", true, true, true],
-    ["Per-agent budgets & merchant restrictions", true, true, true],
-    ["Revocation & credential rotation", true, true, true],
-    ["Owner approvals & activity export", true, true, true],
-    ["Core MCP integration", true, true, true],
-  ] },
-  { group: "Team coordination", rows: [
-    ["Shared agent & team budgets", false, true, true],
-    ["Approval routing by amount, team or merchant", false, true, true],
-    ["Team roles & permissions", false, true, true],
-    ["Scheduled reports & configurable alerts", false, true, true],
-    ["Webhooks & standard integrations", false, true, true],
-  ] },
-  { group: "Enterprise administration", rows: [
-    ["SSO / SAML & automated user provisioning", false, false, true],
-    ["Custom roles & separation of duties", false, false, true],
-    ["Multi-entity administration", false, false, true],
-    ["Custom integrations & retention", false, false, true],
-    ["Contractual support & SLA", false, false, true],
-  ] },
-] satisfies { group: string; rows: [string, ...Array<string | boolean>][] }[];
-
 const questions = [
   ["Can I subscribe to a paid plan now?", "Not yet. These are proposed packages and prices. Paid billing and several listed features are still being built. Previewing a plan does not start a subscription or change your free event trial."],
   ["What counts as an authorization request?", "The proposed allowance counts one valid, unique purchase intent evaluated against your rules, whether approved or blocked. Retries of that intent, status checks, verification, revocation and internal errors do not count again. Authorization is permission to purchase, not proof of payment."],
@@ -84,23 +54,10 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
   }
 
   return <div className={styles.page}>
-    <section className={styles.current} aria-labelledby="current-plan-title">
-      <div className={styles.currentIdentity}>
-        <span className={styles.currentIcon}><ShieldCheck size={22} aria-hidden="true" /></span>
-        <div><div className={styles.currentLabel}>YOUR CURRENT PLAN <span>Active</span></div><h2 id="current-plan-title">Free event trial <span>₹0 charged</span></h2></div>
-      </div>
-      <div className={styles.currentUsage}>
-        <span><strong>{agentCount}<small> / 10</small></strong>registered agents</span>
-        <span><strong>{walletCount}<small> / 20</small></strong>account references</span>
-        <span><strong>{intentCount}<small> / 500</small></strong>trial requests · total</span>
-      </div>
-      <Button className={styles.textLink} onClick={onConnect}>Connect your plugin <ArrowRight size={15} aria-hidden="true" /></Button>
-    </section>
-
     <header className={styles.hero}>
       <span className={styles.eyebrow}>PLANS FOR EVERY STAGE</span>
       <h1>More agents. <span>The same control.</span></h1>
-      <p>From your first team to your whole company.<br />Choose the controls that fit the way you work.</p>
+
     </header>
 
     <div className={styles.planToolbar}>
@@ -108,9 +65,7 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
         <Button aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</Button>
         <Button aria-pressed={annual} onClick={() => setAnnual(true)}>Annually <span>Save 16.7%</span></Button>
       </div>
-      <a className={styles.textLink} href="#plan-comparison">Compare all features <ArrowDown size={14} aria-hidden="true" /></a>
     </div>
-    <p className={styles.availability}><span>Plan preview</span> Paid plans and listed upgrades are coming soon. Your event trial stays free.</p>
 
     <div className={styles.cards}>
       {plans.map(plan => {
@@ -136,31 +91,24 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
         </Card>;
       })}
     </div>
-    <p className={styles.priceNote}>Proposed prices in INR, excluding applicable taxes. Merchant purchases, model usage and payment-provider fees are separate. Annual savings apply to Startup and Business base subscriptions.</p>
 
-    <div className={styles.included}><ShieldCheck size={19} aria-hidden="true" /><p><strong>Core controls belong in every plan.</strong> Spending limits, merchant restrictions, credential rotation and revocation. No extra seat fees for human reviewers.</p></div>
 
-    <div className={styles.extras}>
-      <section><Terminal size={20} aria-hidden="true" /><div><h2>Just exploring? Start small.</h2><p>A free developer sandbox is planned: 2 agents and 100 simulated requests per month.</p><span className={styles.comingSoon}>Coming soon · your event trial is already active</span></div></section>
-      <section><Layers3 size={20} aria-hidden="true" /><div><h2>More volume, on your terms.</h2><p>Planned for Startup and Business: <strong>₹1,000 / 5,000 extra requests.</strong> Explicit purchase. No automatic overage charges.</p><span className={styles.comingSoon}>Optional usage packs · coming soon</span></div></section>
-    </div>
 
-    <section id="plan-comparison" className={styles.comparison} aria-labelledby="comparison-title">
-      <div className={styles.sectionTitle}><div><span className={styles.eyebrow}>THE DETAILS</span><h2 id="comparison-title">A clear path as you grow.</h2></div><p>Proposed plan entitlements.<br />Paid tiers are not available yet.</p></div>
-      <div className={styles.tableScroll} role="region" aria-label="Plan feature comparison, scroll horizontally on small screens" tabIndex={0}>
-        <table className={styles.table}>
-          <caption className={styles.srOnly}>Proposed Startup, Business and Enterprise features. Inclusion does not indicate current availability.</caption>
-          <thead><tr><th scope="col">Features & limits</th>{plans.map(plan => <th scope="col" key={plan.name}>{plan.name}</th>)}</tr></thead>
-          {comparison.map(group => <tbody key={group.group}>
-            <tr className={styles.groupRow}><th colSpan={4} scope="rowgroup">{group.group}</th></tr>
-            {group.rows.map(([label, ...values]) => <tr key={label}><th scope="row">{label}</th>{values.map((value, i) => <td key={i}>{typeof value === "boolean" ? value ? <><Check size={17} aria-hidden="true" /><span className={styles.srOnly}>Included</span></> : <><span aria-hidden="true" className={styles.dash}>—</span><span className={styles.srOnly}>Not included</span></> : value}</td>)}</tr>)}
-          </tbody>)}
-        </table>
+    <section className={styles.current} aria-labelledby="current-plan-title">
+      <div className={styles.currentIdentity}>
+        <span className={styles.currentIcon}><ShieldCheck size={22} aria-hidden="true" /></span>
+        <div><div className={styles.currentLabel}>YOUR CURRENT PLAN <span>Active</span></div><h2 id="current-plan-title">Free event trial <span>₹0 charged</span></h2></div>
       </div>
+      <div className={styles.currentUsage}>
+        <span><strong>{agentCount}<small> / 10</small></strong>registered agents</span>
+        <span><strong>{walletCount}<small> / 20</small></strong>account references</span>
+        <span><strong>{intentCount}<small> / 500</small></strong>trial requests · total</span>
+      </div>
+      <Button variant="ghost" className={styles.textLink} onClick={onConnect}>Connect your plugin <ArrowRight size={15} aria-hidden="true" /></Button>
     </section>
 
     <section className={styles.faq} aria-labelledby="faq-title">
-      <div><span className={styles.eyebrow}>BEFORE YOU CHOOSE</span><h2 id="faq-title">A few good questions.</h2><p>Clear costs. Clear commitments.</p></div>
+      <div><span className={styles.eyebrow}>BEFORE YOU CHOOSE</span><h2 id="faq-title">A few good questions.</h2></div>
       <div>{questions.map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={17} aria-hidden="true" /></summary><p>{answer}</p></details>)}</div>
     </section>
 
