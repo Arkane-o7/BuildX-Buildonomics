@@ -40,6 +40,8 @@ For Vercel, connect a Postgres database through `DATABASE_URL`, supply `SESSION_
 
 ## Payments and subscriptions
 
+For phone approvals, follow [Android setup](docs/PHONE-APPROVALS.md). Hermes can send a merchant-issued UPI request to the owner's phone inbox, with optional browser notifications. The owner opens their UPI app to approve; AgentPass cannot debit the bank directly or independently verify settlement.
+
 Current capability: policy authorization, not bank debits. Subscription status: free event trial, no recurring charge. A supported provider integration is necessary for delegated UPI/card execution; a separate billing integration is necessary to charge for AgentPass subscriptions. Do not configure a customer as a merchant just to let their agent shop.
 
 Earlier Razorpay setup instructions are preserved in `docs/LEGACY-MERCHANT-SETUP.md` for the `/lab` experiment only.

@@ -27,7 +27,8 @@
     "demo:identity-wallet": "tsx scripts/identity-wallet-demo.ts",
     "hermes:shopping": "python3 scripts/platform-plugin.py shop",
     "hermes:prepare-shopping": "python3 scripts/platform-plugin.py prepare-shop",
-    "hermes:remove-shopping": "python3 scripts/platform-plugin.py remove-shop"
+    "hermes:remove-shopping": "python3 scripts/platform-plugin.py remove-shop",
+    "phone:setup": "tsx scripts/setup-phone.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.0",

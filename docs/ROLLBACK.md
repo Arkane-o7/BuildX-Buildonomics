@@ -59,6 +59,14 @@ An earlier Razorpay recurring-payment capability probe created a **test** custom
 
 ## Native Hermes shopping profile
 
+### Phone approval feature
+
+On each connected device, open /phone, enable/reconnect notifications if needed to expose device controls, then select **Disconnect this phone**. You can also revoke the site's notification permission in Android Chrome settings. Removing notifications does not cancel an already submitted payment.
+
+Subscriptions and handoff records are stored inside the event-owned agentpass_accounts records in phoneDevices and phoneRequests. The general event database cleanup removes them. To keep the rest of the account, export needed records and remove only those two fields through owner-controlled maintenance. Do not drop a shared database.
+
+Remove PHONE_VAPID_PUBLIC_KEY and PHONE_VAPID_PRIVATE_KEY from this project's Vercel environment and ignored .env.local when retiring the feature, then redeploy. These are event-owned notification keys, not bank credentials.
+
 Type `/exit` in the shopping Hermes session and close its dedicated Chrome window before cleanup. Run `npm run hermes:remove-shopping -- --yes`. It removes only the marked `.hermes-shopping` directory, including its copied model authentication, Hermes session history and `chrome-debug` browser login data. It preserves `.hermes-platform`, your original `~/.hermes`, and your normal Chrome profile. No shell startup file or global Hermes configuration was changed. Verify with `npm run hermes:check-original`.
 
 Deleting this local profile does not cancel a merchant order, refund a payment or release a server-side allowance reservation. Handle those separately in the merchant account and AgentPass dashboard after checking the actual order/payment state.

@@ -5,9 +5,9 @@ const client=new Client({name:'agentpass-platform-check',version:'1.0.0'});
 await client.connect(new StdioClientTransport({command:'python3',args:[resolve('scripts/platform-plugin.py'),'mcp']}));
 try {
  const {tools}=await client.listTools();
- const expected=['passport','authorize_purchase','purchase_history','verify_authority','report_order'];
+ const expected=['passport','authorize_purchase','purchase_history','verify_authority','report_order','send_payment_to_phone','phone_payment_status'];
  if (expected.some(name=>!tools.some(t=>t.name===name))) throw Error('Required plugin tools missing');
- console.log('Five scoped platform MCP tools discovered.');
+ console.log('Seven scoped platform MCP tools discovered, including phone handoff and status.');
  async function call(name:string,args:Record<string,unknown>={}) {
   const r=await client.callTool({name,arguments:args});
   if(r.isError) throw Error(name+' failed');

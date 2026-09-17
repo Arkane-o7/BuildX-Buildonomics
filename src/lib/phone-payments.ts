@@ -47,6 +47,7 @@ export function createPhoneRequest(account: OwnerAccount, auth: Principal, input
   const intent = account.intents.find(i => i.id === input.intentId);
   if (!intent) throw new AppError(404, "Purchase authorization not found.");
   const agent = scopedAgent(account, auth, intent.agentId);
+  if (account.wallets.find(w => w.id === agent.walletId)?.kind !== "upi") throw new AppError(409, "Bind the intended UPI account reference before requesting a UPI payment.");
   if (!intent.proof || !currentAuthority(account, intent.proof, now).authorized) throw new AppError(409, "Obtain current purchase authority before requesting payment.");
   const source = new URL(input.sourceUrl);
   if (source.protocol !== "https:" || source.username || source.password || source.port || source.hostname !== intent.merchant)
