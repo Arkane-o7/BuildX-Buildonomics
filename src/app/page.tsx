@@ -26,170 +26,6 @@ function CustomCursor() {
   }, []);
   return <div className="custom-cursor" ref={ref} />;
 }
-function SidebarNav({ tab, setTab }: { tab: string; setTab: (t: string) => void }) {
-  const navRef = useRef<HTMLElement>(null);
-  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [pill, setPill] = useState({ top: 0, height: 0, ready: false });
-  const measure = useCallback(() => {
-    const el = itemRefs.current[tab];
-    if (!el) return;
-    setPill({ top: el.offsetTop, height: el.offsetHeight, ready: true });
-  }, [tab]);
-  useEffect(() => { measure(); }, [measure]);
-  useEffect(() => {
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [measure]);
-  return (
-    <nav ref={navRef}>
-      <span className="nav-pill" style={{ transform: `translateY(${pill.top}px)`, height: pill.height, opacity: pill.ready ? 1 : 0 }} />
-      {tabs.map(({ name, icon: Icon }) => (
-        <button
-          key={name}
-          ref={(el) => { itemRefs.current[name] = el; }}
-          className={`nav-item ${tab === name ? "active" : ""}`}
-          onClick={() => setTab(name)}
-        >
-          <Icon size={18} />{name}
-        </button>
-      ))}
-    </nav>
-  );
-}
-function useCountUp(value: number, duration = 900) {
-  const [display, setDisplay] = useState(value);
-  const prev = useRef(value);
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      setDisplay(value);
-      prev.current = value;
-      return;
-    }
-    const from = prev.current, to = value;
-    if (from === to) return;
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(from + (to - from) * eased);
-      if (t < 1) raf = requestAnimationFrame(tick);
-      else prev.current = to;
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [value, duration]);
-  return display;
-}
-function AgentCard({ agent, selected, onSelect }: { agent: PublicAccount["agents"][number]; selected: boolean; onSelect: () => void }) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [ringLive, setRingLive] = useState(false);
-  useEffect(() => {
-    if (!selected) { setRingLive(false); return; }
-    const t = setTimeout(() => setRingLive(true), 550);
-    return () => clearTimeout(t);
-  }, [selected]);
-  const onMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
-    el.style.setProperty("--mx", `${fx * 100}%`);
-    el.style.setProperty("--my", `${fy * 100}%`);
-    const dx = fx - 0.5, dy = fy - 0.5;
-    el.style.transform = `perspective(700px) rotateX(${(-dy * 12).toFixed(2)}deg) rotateY(${(dx * 12).toFixed(2)}deg) translateY(-2px)`;
-  };
-  const onLeave = () => { if (ref.current) ref.current.style.transform = ""; };
-  const allowance = useCountUp(agent.budget - agent.spent - agent.reserved);
-  return (
-    <button ref={ref} className={`fleet-card reveal ${selected ? "selected" : ""} ${ringLive ? "ring-live" : ""}`} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onSelect}>
-      <span className="fleet-spotlight" />
-      <div className="fleet-top">
-        <span className="identity-avatar avatar-image"><img src={`/${agent.avatar}`} alt={`${agent.name} agent avatar`} /></span>
-        <span className={`status ${agent.status}`}>{agent.status === "active" && <i className="status-dot"><i className="status-pulse" /></i>}{agent.status === "active" ? "Active" : "Revoked"}</span>
-      </div>
-      <h2>{agent.name}</h2>
-      <p>{agent.runtime} · Owner attested</p>
-      <small className="mono">{agent.id.slice(0, 18)}…</small>
-      <footer><span>{money(Math.round(allowance))} allowance left</span><ArrowUpRight size={15} /></footer>
-    </button>
-  );
-}
-function useEasedProgress(target: number, duration: number) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setDisplay(target); return; }
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(target * eased);
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-  return display;
-}
-function SpendBar({ budget, spent, reserved }: { budget: number; spent: number; reserved: number }) {
-  const spentPct = useEasedProgress(budget > 0 ? (spent / budget) * 100 : 0, 1100);
-  const reservedPct = useEasedProgress(budget > 0 ? (reserved / budget) * 100 : 0, 1100);
-  const remaining = budget - spent - reserved;
-  return (
-    <div className="spend-bar-wrap">
-      <div className="spend-bar-track">
-        <span className="spend-bar-seg spend-seg-spent" style={{ width: `${spentPct}%` }} />
-        <span className="spend-bar-seg spend-seg-reserved" style={{ width: `${reservedPct}%`, left: `${spentPct}%` }} />
-      </div>
-      <div className="spend-bar-legend">
-        <span><i className="legend-dot legend-spent" />Spent <strong>{money(spent)}</strong></span>
-        <span><i className="legend-dot legend-reserved" />Reserved <strong>{money(reserved)}</strong></span>
-        <span><i className="legend-dot legend-remaining" />Remaining <strong>{money(remaining)}</strong></span>
-      </div>
-    </div>
-  );
-}
-function UsageGauge({ pct }: { pct: number }) {
-  const display = useEasedProgress(pct, 1000);
-  return (
-    <span className="usage-gauge" style={{ "--pct": display } as React.CSSProperties}>
-      <span className="usage-gauge-label">{Math.round(display)}%</span>
-    </span>
-  );
-}
-function DecryptingId({ value }: { value: string }) {
-  const [display, setDisplay] = useState(value);
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setDisplay(value); return; }
-    const hex = "0123456789abcdef";
-    const frames = 20, frameMs = 29;
-    const chars = value.split("");
-    let frame = 0;
-    const interval = setInterval(() => {
-      frame++;
-      const revealCount = Math.floor((frame / frames) * chars.length);
-      setDisplay(chars.map((c, i) => (c === "-" || i < revealCount) ? c : hex[Math.floor(Math.random() * 16)]).join(""));
-      if (frame >= frames) { setDisplay(value); clearInterval(interval); }
-    }, frameMs);
-    return () => clearInterval(interval);
-  }, [value]);
-  return <dd className="mono decrypt-id">{display}</dd>;
-}
-function BindingForm({ currentWalletId, wallets, busy, onSubmit }: { currentWalletId: string | null; wallets: { id: string; label: string; maskedReference: string }[]; busy: boolean; onSubmit: (e: FormEvent<HTMLFormElement>) => void }) {
-  const [walletId, setWalletId] = useState(currentWalletId || "");
-  return (
-    <form className="saas-form" onSubmit={onSubmit}>
-      <label>Payment account
-        <select name="walletId" value={walletId} onChange={e => setWalletId(e.target.value)} required>
-          <option value="" disabled>Select an account reference</option>
-          {wallets.map(w => <option key={w.id} value={w.id}>{w.label} · {w.maskedReference}</option>)}
-        </select>
-      </label>
-      <button className={`button secondary ${walletId ? "cta-glow" : ""}`} disabled={busy || !wallets.length || !walletId}>Save binding</button>
-    </form>
-  );
-}
 export default function AgentPass() {
   const [account, setAccount] = useState<PublicAccount | null>(null);
   const [loading, setLoading] = useState(true), [signup, setSignup] = useState(false), [authOpen, setAuthOpen] = useState(false);
@@ -236,15 +72,15 @@ export default function AgentPass() {
         <section className="saas-explainer" id="how-it-works"><div><span className="eyebrow">THE CONTROL LAYER</span><h2>One place to manage<br />what your agents can do.</h2></div><ol><li><strong>Register an identity</strong><p>Give each agent its own credential and an owner-attested passport.</p></li><li><strong>Bind an account and set rules</strong><p>Choose the payment account, merchant allowlist and spending limits.</p></li><li><strong>Authorize exact purchases</strong><p>The plugin requests permission for a specific merchant, item and total.</p></li><li><strong>Keep the evidence</strong><p>Review requests, track reported orders and revoke new spending authority.</p></li></ol></section>
         <section className="saas-plugin-pitch" id="plugin"><Terminal size={27} /><div><h2>A plugin for the agent you already use.</h2><p>Connect Hermes or an MCP-compatible runtime. AgentPass supplies identity and authorization; your agent's browser or commerce tools handle shopping.</p><p className="saas-capability">This build supports account references and policy authorization. Autonomous UPI/card execution and paid subscriptions are not connected yet. No simulated balance is presented as a wallet.</p></div><button className="button secondary" onClick={() => { setSignup(true); setAuthOpen(true); }}>Connect an agent <ArrowUpRight size={16} /></button></section>
       </main><footer className="saas-site-footer"><span>AgentPass · BuildX</span><a href="https://github.com/Arkane-o7/BuildX-Buildonomics" target="_blank" rel="noreferrer">Source & setup ↗</a><a href="/lab">Earlier checkout experiment</a></footer>
-    </> : <div className="app-shell"><aside className="sidebar"><a className="brand" href="/"><span className="brand-mark"><img src="/logo.png" alt="AgentPass logo" style={{ imageRendering: "auto" }} /></span>agentpass<span className="brand-period">.</span></a><div className="workspace"><span className="workspace-icon">{account.name.slice(0, 1).toUpperCase()}</span><div><strong>{account.name}</strong><small>Personal workspace</small></div></div><span className="nav-caption">MANAGE</span><SidebarNav tab={tab} setTab={setTab} /><div className="sidebar-bottom"><button className="nav-item" onClick={() => action(async () => { await api("logout", {}); setAccount(null); setToken(""); })}><LogOut size={16} />Sign out</button></div></aside>
+    </> : <div className="app-shell"><aside className="sidebar"><a className="brand" href="/"><span className="brand-mark"><img src="/logo.png" alt="AgentPass logo" style={{ imageRendering: "auto" }} /></span>agentpass<span className="brand-period">.</span></a><div className="workspace"><span className="workspace-icon">{account.name.slice(0, 1).toUpperCase()}</span><div><strong>{account.name}</strong><small>Personal workspace</small></div></div><span className="nav-caption">MANAGE</span><nav>{tabs.map(({ name, icon: Icon }) => <button key={name} className={`nav-item ${tab === name ? "active" : ""}`} onClick={() => setTab(name)}><Icon size={18} />{name}</button>)}</nav><div className="sidebar-bottom"><button className="nav-item" onClick={() => action(async () => { await api("logout", {}); setAccount(null); setToken(""); })}><LogOut size={16} />Sign out</button></div></aside>
       <div className="main-shell"><header className="topbar"><div className="breadcrumbs">Your workspace <ArrowRight size={12} /><strong>{tab}</strong></div></header><main className="dashboard">
-        <div className="page-heading"><div><h1>{tab === "Agents" ? `Welcome back, ${account.name}.` : tab}</h1>{tab !== "Agents" && <p>{tab === "Payment accounts" ? "Manage account bindings without handing financial secrets to your agents." : tab === "Activity" ? "Policy decisions and order reports. Evidence sources stay explicit." : tab === "Connect plugin" ? "Scoped access for Hermes and other MCP-compatible agents." : "Your AgentPass software plan is separate from your agents’ purchases."}</p>}</div>{tab === "Agents" && <button className="button primary cta-glow" onClick={() => setModal("agent")}><Plus size={16} />Register agent</button>}{tab === "Payment accounts" && <button className="button primary" onClick={() => setModal("wallet")}><Plus size={16} />Add account reference</button>}</div>
+        <div className="page-heading"><div><h1>{tab === "Agents" ? `Welcome back, ${account.name}.` : tab}</h1>{tab !== "Agents" && <p>{tab === "Payment accounts" ? "Manage account bindings without handing financial secrets to your agents." : tab === "Activity" ? "Policy decisions and order reports. Evidence sources stay explicit." : tab === "Connect plugin" ? "Scoped access for Hermes and other MCP-compatible agents." : "Your AgentPass software plan is separate from your agents’ purchases."}</p>}</div>{tab === "Agents" && <button className="button primary" onClick={() => setModal("agent")}><Plus size={16} />Register agent</button>}{tab === "Payment accounts" && <button className="button primary" onClick={() => setModal("wallet")}><Plus size={16} />Add account reference</button>}</div>
         {error && <div role="alert" className="alert error">{error}</div>}{notice && <div role="status" className="alert success">{notice}</div>}
         {tab === "Agents" && <>
           {!account.agents.length ? <section className="saas-empty"><Fingerprint size={40} /><h2>Meet your first agent.</h2><p>Register Hermes, give it an identity, and choose the rules that follow it.</p><button className="button primary" onClick={() => setModal("agent")}>Register your first agent <ArrowRight size={16} /></button></section> : <>
-            <div className="fleet-grid">{account.agents.map(a => <AgentCard key={a.id} agent={a} selected={agent?.id === a.id} onSelect={() => setSelected(a.id)} />)}</div>
-            {agent && <div className="saas-agent-grid"><section className="panel"><div className="section-heading"><div><h2>{agent.name}'s spending policy</h2><p>Limits are permissions, not a funded balance.</p></div><div className="section-heading-right"><UsageGauge pct={agent.budget > 0 ? Math.min(100, ((agent.spent + agent.reserved) / agent.budget) * 100) : 0} /><SlidersHorizontal size={20} /></div></div><form key={agent.id + ':' + agent.policyVersion} className="saas-form padded" onSubmit={e => formAction(e, `agents/${agent.id}/policy`, f => ({ budget: Math.round(Number(f.get("budget")) * 100), perPurchase: Math.round(Number(f.get("cap")) * 100), allowedMerchants: String(f.get("merchants")).split(/[,\n]/).map(s => s.trim()).filter(Boolean) }))}><div className="form-row"><label>Total allowance (₹)<input name="budget" type="number" min="1" max="100000" step="0.01" defaultValue={agent.budget / 100} required /></label><label>Per purchase (₹)<input name="cap" type="number" min="1" max="100000" step="0.01" defaultValue={agent.perPurchase / 100} required /></label></div><label>Allowed merchant domains<input name="merchants" defaultValue={agent.allowedMerchants.join(", ")} placeholder="amazon.in, flipkart.com" required /><small>Comma-separated domains. Subdomains are included.</small></label><SpendBar budget={agent.budget} spent={agent.spent} reserved={agent.reserved} /><button className="button primary" disabled={busy}>Save policy <Check size={16} /></button></form></section>
-              <section className="panel"><div className="section-heading"><div><h2>Identity & account binding</h2><p>Switch accounts without resetting history.</p></div><Link2 size={20} /></div><div className="padded"><dl className="receipt-details"><dt>Stable identity</dt><DecryptingId key={agent.id} value={agent.id} /><dt>Binding version</dt><dd>v{agent.bindingVersion}</dd><dt>Owner</dt><dd>{account.name}</dd><dt>Last plugin contact</dt><dd>{agent.lastSeen ? new Date(agent.lastSeen).toLocaleString() : "Not connected"}</dd></dl><BindingForm key={agent.id + ':' + agent.bindingVersion} currentWalletId={agent.walletId} wallets={account.wallets} busy={busy} onSubmit={e => formAction(e, `agents/${agent.id}/binding`)} />{!account.wallets.length && <button className="text-button" onClick={() => { setTab("Payment accounts"); setModal("wallet"); }}>Add your first account reference →</button>}<p className="saas-capability">Payment execution: not connected. References identify the selected account; they do not grant access to funds.</p><button className={`button ${agent.status === "active" ? "danger-outline" : "secondary"}`} disabled={busy} onClick={() => action(async () => { await api(`agents/${agent.id}/${agent.status === "active" ? "revoke" : "resume"}`, {}); await refresh(); })}>{agent.status === "active" ? "Revoke spending authority" : "Restore spending authority"}</button></div></section>
+            <div className="fleet-grid">{account.agents.map(a => <button className={`fleet-card ${agent?.id === a.id ? "selected" : ""}`} key={a.id} onClick={() => setSelected(a.id)}><div className="fleet-top"><span className="identity-avatar avatar-image"><img src={`/${a.avatar}`} alt={`${a.name} agent avatar`} /></span><span className={`status ${a.status}`}>{a.status === "active" ? "Active" : "Revoked"}</span></div><h2>{a.name}</h2><p>{a.runtime} · Owner attested</p><small className="mono">{a.id.slice(0, 18)}…</small><footer><span>{money(a.budget - a.spent - a.reserved)} allowance left</span><ArrowUpRight size={15} /></footer></button>)}</div>
+            {agent && <div className="saas-agent-grid"><section className="panel"><div className="section-heading"><div><h2>{agent.name}'s spending policy</h2><p>Limits are permissions, not a funded balance.</p></div><SlidersHorizontal size={20} /></div><form key={agent.id + ':' + agent.policyVersion} className="saas-form padded" onSubmit={e => formAction(e, `agents/${agent.id}/policy`, f => ({ budget: Math.round(Number(f.get("budget")) * 100), perPurchase: Math.round(Number(f.get("cap")) * 100), allowedMerchants: String(f.get("merchants")).split(/[,\n]/).map(s => s.trim()).filter(Boolean) }))}><div className="form-row"><label>Total allowance (₹)<input name="budget" type="number" min="1" max="100000" step="0.01" defaultValue={agent.budget / 100} required /></label><label>Per purchase (₹)<input name="cap" type="number" min="1" max="100000" step="0.01" defaultValue={agent.perPurchase / 100} required /></label></div><label>Allowed merchant domains<input name="merchants" defaultValue={agent.allowedMerchants.join(", ")} placeholder="amazon.in, flipkart.com" required /><small>Comma-separated domains. Subdomains are included.</small></label><div className="saas-metrics"><span>Reported spend<strong>{money(agent.spent)}</strong></span><span>Reserved<strong>{money(agent.reserved)}</strong></span></div><button className="button primary" disabled={busy}>Save policy <Check size={16} /></button></form></section>
+              <section className="panel"><div className="section-heading"><div><h2>Identity & account binding</h2><p>Switch accounts without resetting history.</p></div><Link2 size={20} /></div><div className="padded"><dl className="receipt-details"><dt>Stable identity</dt><dd className="mono">{agent.id}</dd><dt>Binding version</dt><dd>v{agent.bindingVersion}</dd><dt>Owner</dt><dd>{account.name}</dd><dt>Last plugin contact</dt><dd>{agent.lastSeen ? new Date(agent.lastSeen).toLocaleString() : "Not connected"}</dd></dl><form key={agent.id + ':' + agent.bindingVersion} className="saas-form" onSubmit={e => formAction(e, `agents/${agent.id}/binding`)}><label>Payment account<select name="walletId" defaultValue={agent.walletId || ""} required><option value="" disabled>Select an account reference</option>{account.wallets.map(w => <option key={w.id} value={w.id}>{w.label} · {w.maskedReference}</option>)}</select></label><button className="button secondary" disabled={busy || !account.wallets.length}>Save binding</button></form>{!account.wallets.length && <button className="text-button" onClick={() => { setTab("Payment accounts"); setModal("wallet"); }}>Add your first account reference →</button>}<p className="saas-capability">Payment execution: not connected. References identify the selected account; they do not grant access to funds.</p><button className={`button ${agent.status === "active" ? "danger-outline" : "secondary"}`} disabled={busy} onClick={() => action(async () => { await api(`agents/${agent.id}/${agent.status === "active" ? "revoke" : "resume"}`, {}); await refresh(); })}>{agent.status === "active" ? "Revoke spending authority" : "Restore spending authority"}</button></div></section>
             </div>}
           </>}
         </>}
