@@ -1,7 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ArrowDown, ArrowRight, Building2, Check, ChevronDown, Fingerprint, Layers3, ShieldCheck, Terminal, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import styles from "./subscription-plans.module.css";
 
 const rupees = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
@@ -73,11 +76,11 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
 }) {
   const [annual, setAnnual] = useState(false);
   const [preview, setPreview] = useState<(typeof plans)[number]>(plans[0]);
-  const dialog = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
 
   function previewPlan(plan: (typeof plans)[number]) {
     setPreview(plan);
-    dialog.current?.showModal();
+    setOpen(true);
   }
 
   return <div className={styles.page}>
@@ -91,7 +94,7 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
         <span><strong>{walletCount}<small> / 20</small></strong>account references</span>
         <span><strong>{intentCount}<small> / 500</small></strong>trial requests · total</span>
       </div>
-      <button className={styles.textLink} onClick={onConnect}>Connect your plugin <ArrowRight size={15} aria-hidden="true" /></button>
+      <Button className={styles.textLink} onClick={onConnect}>Connect your plugin <ArrowRight size={15} aria-hidden="true" /></Button>
     </section>
 
     <header className={styles.hero}>
@@ -102,8 +105,8 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
 
     <div className={styles.planToolbar}>
       <div className={styles.billing} role="group" aria-label="Billing period">
-        <button aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</button>
-        <button aria-pressed={annual} onClick={() => setAnnual(true)}>Annually <span>Save 16.7%</span></button>
+        <Button aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</Button>
+        <Button aria-pressed={annual} onClick={() => setAnnual(true)}>Annually <span>Save 16.7%</span></Button>
       </div>
       <a className={styles.textLink} href="#plan-comparison">Compare all features <ArrowDown size={14} aria-hidden="true" /></a>
     </div>
@@ -113,7 +116,7 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
       {plans.map(plan => {
         const featured = plan.name === "Business";
         const enterprise = plan.monthly === null;
-        return <article key={plan.name} className={`${styles.card} ${featured ? styles.featured : ""}`}>
+        return <Card key={plan.name} className={`${styles.card} ${featured ? styles.featured : ""}`}>
           <div className={styles.cardLabel}>{featured ? "RECOMMENDED FOR MULTIPLE TEAMS" : enterprise ? "FOR YOUR ORGANIZATION" : "FOR YOUR FIRST TEAM"}</div>
           <div className={styles.cardBody}>
             <div className={styles.planName}><plan.icon size={22} strokeWidth={1.6} aria-hidden="true" /><h2>{plan.name}</h2></div>
@@ -122,7 +125,7 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
               <div className={styles.price}>{enterprise ? "Custom" : rupees(annual ? plan.annual : plan.monthly!)}{!enterprise && <span>/{annual ? "year" : "month"}</span>}</div>
               <p>{enterprise ? `From ${rupees(plan.annual)} / year · annual contract` : annual ? "Billed annually · two months saved" : "Billed monthly · per workspace"}</p>
             </div>
-            <button className={`${styles.planButton} ${featured ? styles.primary : ""}`} onClick={() => previewPlan(plan)}>Preview {plan.name} <ArrowRight size={15} aria-hidden="true" /></button>
+            <Button className={`${styles.planButton} ${featured ? styles.primary : ""}`} onClick={() => previewPlan(plan)}>Preview {plan.name} <ArrowRight size={15} aria-hidden="true" /></Button>
             <div className={styles.capacity}>
               <span><strong>{plan.agents}</strong> {enterprise ? "agent capacity" : "enabled agents"}</span>
               <span><strong>{plan.requests}</strong> {enterprise ? "request volume" : "requests / month"}</span>
@@ -130,7 +133,7 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
             <h3 className={styles.featureLead}>{plan.lead}</h3>
             <ul className={styles.features}>{plan.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" /><span>{feature}</span></li>)}</ul>
           </div>
-        </article>;
+        </Card>;
       })}
     </div>
     <p className={styles.priceNote}>Proposed prices in INR, excluding applicable taxes. Merchant purchases, model usage and payment-provider fees are separate. Annual savings apply to Startup and Business base subscriptions.</p>
@@ -161,18 +164,17 @@ export default function SubscriptionPlans({ agentCount, walletCount, intentCount
       <div>{questions.map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={17} aria-hidden="true" /></summary><p>{answer}</p></details>)}</div>
     </section>
 
-    <dialog ref={dialog} className={styles.dialog} aria-labelledby="plan-preview-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
       <div className={styles.dialogBody}>
-        <button className={styles.close} aria-label="Close plan preview" onClick={() => dialog.current?.close()}><X size={20} /></button>
         <span className={styles.eyebrow}>PROPOSED PLAN · COMING SOON</span>
-        <h2 id="plan-preview-title">{preview.name}</h2>
-        <p>{preview.fit}</p>
+        <DialogTitle>{preview.name}</DialogTitle>
+        <DialogDescription>{preview.fit}</DialogDescription>
         <div className={styles.dialogPrice}><strong>{preview.monthly === null ? `From ${rupees(preview.annual)}` : rupees(annual ? preview.annual : preview.monthly)}</strong><span>{preview.monthly === null ? "per year · annual contract" : annual ? "billed annually" : "per month · billed monthly"}</span></div>
         <p className={styles.dialogFine}>Excludes applicable taxes, merchant purchases and external provider costs. {annual && preview.monthly !== null && "Request allowances reset monthly."}</p>
         <ul className={styles.features}>{preview.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>)}</ul>
         <div className={styles.previewNotice}><ShieldCheck size={18} aria-hidden="true" /><p><strong>Your free trial stays active.</strong> Paid billing and listed upgrades are not available yet. No subscription has been started and nothing will be charged.</p></div>
-        <button className={`${styles.planButton} ${styles.primary}`} onClick={() => dialog.current?.close()}>Back to plans</button>
+        <Button className={`${styles.planButton} ${styles.primary}`} onClick={() => setOpen(false)}>Back to plans</Button>
       </div>
-    </dialog>
+    </DialogContent></Dialog>
   </div>;
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Bell, Check, Fingerprint, Smartphone, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import styles from "./phone.module.css";
 
 type RequestView = { id: string; agentName: string; merchant: string; item: string; payee: string; payeeName: string; amount: number; active: boolean; status: string; expiresAt: string; orderReference: string | null; delivery: string };
@@ -61,11 +63,11 @@ export default function Phone() {
     {notice && <div className={styles.notice} role="status">{notice}</div>}
     {loading ? <p>Loading your payment inbox…</p> : !owner ? <section className={styles.card}>
       <h2>Connect your workspace</h2><p>Sign in with the same AgentPass account your Hermes agent uses.</p>
-      <form onSubmit={login} className={styles.form}><label>Email<input name="email" type="email" required autoComplete="username" /></label><label>Password<input name="password" type="password" required autoComplete="current-password" /></label><button disabled={busy}>Sign in on this phone</button></form>
+      <form onSubmit={login} className={styles.form}><label>Email<Input name="email" type="email" required autoComplete="username" /></label><label>Password<Input name="password" type="password" required autoComplete="current-password" /></label><Button type="submit" disabled={busy}>Sign in on this phone</Button></form>
       <p className={styles.small}>Need an account? <a href="/">Open your dashboard</a>.</p>
     </section> : <>
       <section className={styles.card}><div className={styles.row}><Smartphone /><div><h2>{owner}</h2><p>Your payment inbox</p></div></div>
-        {supported ? <div className={styles.actions}><button disabled={busy} onClick={() => void action(connect)}><Bell size={17} />{connected ? "Reconnect notifications" : "Enable phone notifications"}</button><button className={styles.secondary} disabled={busy} onClick={() => void action(async () => { const r = await api("phone/test", {}); setNotice(r.accepted ? "Test alert accepted by the push service. Check this phone’s notifications." : "No alert was accepted. Enable notifications on this phone and try again."); })}>Send test alert</button>{connected && <button className={styles.textButton} disabled={busy} onClick={() => void action(disconnect)}>Disconnect this phone</button>}</div> : <p>Keep this page open to receive requests. For notifications on iPhone, add AgentPass to your Home Screen and open it from there.</p>}
+        {supported ? <div className={styles.actions}><Button disabled={busy} onClick={() => void action(connect)}><Bell size={17} />{connected ? "Reconnect notifications" : "Enable phone notifications"}</Button><Button variant="outline" className={styles.secondary} disabled={busy} onClick={() => void action(async () => { const r = await api("phone/test", {}); setNotice(r.accepted ? "Test alert accepted by the push service. Check this phone’s notifications." : "No alert was accepted. Enable notifications on this phone and try again."); })}>Send test alert</Button>{connected && <Button variant="ghost" className={styles.textButton} disabled={busy} onClick={() => void action(disconnect)}>Disconnect this phone</Button>}</div> : <p>Keep this page open to receive requests. For notifications on iPhone, add AgentPass to your Home Screen and open it from there.</p>}
         <p className={styles.small}>Android: use Chrome and allow notifications. This connects AgentPass alerts, not your bank account.</p>
       </section>
       <div className={styles.sectionLabel}><h2>Payment requests</h2><span>Updates every 5 seconds</span></div>
@@ -75,8 +77,8 @@ export default function Phone() {
         <h2 className={styles.item}>{r.item}</h2><div className={styles.amount}>₹{(r.amount / 100).toFixed(2)}</div>
         <dl className={styles.details}><dt>Payee in merchant QR</dt><dd>{r.payeeName}</dd><dt>Payee UPI ID</dt><dd>{r.payee}</dd><dt>Request expires</dt><dd>{new Date(r.expiresAt).toLocaleTimeString()}</dd></dl>
         <p className={styles.small}>Provided by your agent from the merchant checkout. Verify these details in your UPI app; AgentPass has not independently verified the payee.</p>
-        {r.status === "pending" && r.active && <div className={styles.actions}><button disabled={busy} onClick={() => void action(() => openPayment(r.id))}>Open UPI app to pay <ArrowUpRight size={18} /></button><button className={styles.secondary} disabled={busy} onClick={() => void action(async () => { await api("phone/decision", { id: r.id, decision: "decline" }); await refresh(); })}>Decline request</button></div>}
-        {r.status === "opened" && <><p>Check the result in your UPI app. Don’t pay again if the status is uncertain.</p><button disabled={busy} onClick={() => void action(async () => { await api("phone/decision", { id: r.id, decision: "paid" }); await refresh(); setNotice("Hermes can now see your report. It must check the merchant’s confirmation."); })}>I approved payment in my UPI app</button><p className={styles.small}>If the app did not open, return to the merchant checkout. This browser may not support this merchant’s UPI link.</p></>}
+        {r.status === "pending" && r.active && <div className={styles.actions}><Button disabled={busy} onClick={() => void action(() => openPayment(r.id))}>Open UPI app to pay <ArrowUpRight size={18} /></Button><Button variant="outline" className={styles.secondary} disabled={busy} onClick={() => void action(async () => { await api("phone/decision", { id: r.id, decision: "decline" }); await refresh(); })}>Decline request</Button></div>}
+        {r.status === "opened" && <><p>Check the result in your UPI app. Don’t pay again if the status is uncertain.</p><Button disabled={busy} onClick={() => void action(async () => { await api("phone/decision", { id: r.id, decision: "paid" }); await refresh(); setNotice("Hermes can now see your report. It must check the merchant’s confirmation."); })}>I approved payment in my UPI app</Button><p className={styles.small}>If the app did not open, return to the merchant checkout. This browser may not support this merchant’s UPI link.</p></>}
         {r.status === "user_reported_paid" && <p className={styles.notice}>You reported payment approval. Merchant confirmation is still required.</p>}
         {r.orderReference && <p>Merchant order reported: <strong>{r.orderReference}</strong>. This is not independently verified settlement.</p>}
       </section>)}
