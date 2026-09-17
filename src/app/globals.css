@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Inter:wght@400;500;600&family=Manrope:wght@500;600;650;700;750;800&display=swap");
 :root {
   --ink: #1c2b43;
   --muted: #758198;
@@ -1833,11 +1833,97 @@ button.fleet-card:hover { border-color:#a0a6ed; }
 .saas .modal { max-height:90vh; overflow:auto; }
 .saas .table-wrap { overflow:auto; }
 
-/* Warm red/orange accent tint, scoped to this page only — keeps --indigo as the brand/button color everywhere. */
-.saas { --soft:#fde3d0; --warm-accent:#ff6a3d; }
+/* ==== Redesign: design tokens (scoped to this page; light + dark) ==== */
+.saas {
+  --canvas:#F6F5FB; --surface:#FFFFFF; --border:#E8E5F2; --border-strong:#D9D4EC;
+  --ink-2:#1C1B33; --ink-soft:#6E6B85; --ink-faint:#9C99B3;
+  --indigo-2:#4F46E5; --violet:#8B7CF6; --coral:#F0977A; --green-2:#16A34A;
+  --soft:#fde3d0; --warm-accent:#F0977A;
+  background:var(--canvas); color:var(--ink); min-height:100vh; font-family:"Inter", Arial, sans-serif;
+}
+.saas h1, .saas h2, .saas h3, .saas .brand, .saas .nav-item, .saas .fleet-card h2, .saas .modal h2 { font-family:"Manrope", Arial, sans-serif; }
+.saas .mono, .saas .figure, .saas .budget-number, .saas .checkout-amount { font-variant-numeric:tabular-nums; }
+.saas .decrypt-id { font-variant-numeric:normal; font-family:"SFMono-Regular", Consolas, monospace; }
+/* Redefining the EXISTING --ink/--muted/--line/--bg/--indigo tokens (not just the new named ones) so every
+   pre-existing rule on this page that already references them picks up dark values for free. */
+@media (prefers-color-scheme:dark) {
+  .saas:not([data-theme="light"]) {
+    --canvas:#131126; --surface:#1B1932; --border:#332F55; --border-strong:#413C6B;
+    --ink-2:#F2F1FA; --ink-soft:#ACA8C9; --ink-faint:#7A7699;
+    --indigo-2:#8C81FF; --violet:#A99BFF; --coral:#F2A98A; --green-2:#4ADE80;
+    --bg:var(--canvas); --ink:var(--ink-2); --muted:var(--ink-soft); --line:var(--border); --indigo:var(--indigo-2); --soft:#332a4d;
+  }
+}
+.saas[data-theme="dark"] {
+  --canvas:#131126; --surface:#1B1932; --border:#332F55; --border-strong:#413C6B;
+  --ink-2:#F2F1FA; --ink-soft:#ACA8C9; --ink-faint:#7A7699;
+  --indigo-2:#8C81FF; --violet:#A99BFF; --coral:#F2A98A; --green-2:#4ADE80;
+  --bg:var(--canvas); --ink:var(--ink-2); --muted:var(--ink-soft); --line:var(--border); --indigo:var(--indigo-2); --soft:#332a4d;
+}
+@media (prefers-color-scheme:dark) {
+  .saas:not([data-theme="light"]) .sidebar, .saas:not([data-theme="light"]) .topbar, .saas:not([data-theme="light"]) .panel, .saas:not([data-theme="light"]) .passport-card, .saas:not([data-theme="light"]) .budget-card, .saas:not([data-theme="light"]) .modal, .saas:not([data-theme="light"]) .fleet-card, .saas:not([data-theme="light"]) .identity-stack, .saas:not([data-theme="light"]) .saas-plugin-pitch, .saas:not([data-theme="light"]) .saas-empty { background:var(--surface) !important; }
+}
+.saas[data-theme="dark"] .sidebar, .saas[data-theme="dark"] .topbar, .saas[data-theme="dark"] .panel, .saas[data-theme="dark"] .passport-card, .saas[data-theme="dark"] .budget-card, .saas[data-theme="dark"] .modal, .saas[data-theme="dark"] .fleet-card, .saas[data-theme="dark"] .identity-stack, .saas[data-theme="dark"] .saas-plugin-pitch, .saas[data-theme="dark"] .saas-empty { background:var(--surface) !important; }
+@media (prefers-color-scheme:dark) {
+  .saas:not([data-theme="light"]) .button.secondary { background:var(--surface); color:var(--ink); }
+  .saas:not([data-theme="light"]) .button.secondary:hover { background:var(--border); }
+}
+.saas[data-theme="dark"] .button.secondary { background:var(--surface); color:var(--ink); }
+.saas[data-theme="dark"] .button.secondary:hover { background:var(--border); }
+@media (prefers-color-scheme:dark) {
+  .saas:not([data-theme="light"]) .saas-form input, .saas:not([data-theme="light"]) .saas-form select, .saas:not([data-theme="light"]) .plugin-credential select, .saas:not([data-theme="light"]) .modal input:not([type="checkbox"]), .saas:not([data-theme="light"]) code, .saas:not([data-theme="light"]) .token-display { background:var(--surface); border-color:var(--border-strong); color:var(--ink); }
+}
+.saas[data-theme="dark"] .saas-form input, .saas[data-theme="dark"] .saas-form select, .saas[data-theme="dark"] .plugin-credential select, .saas[data-theme="dark"] .modal input:not([type="checkbox"]), .saas[data-theme="dark"] code, .saas[data-theme="dark"] .token-display { background:var(--surface); border-color:var(--border-strong); color:var(--ink); }
+.saas nav { position:relative; }
+.saas .nav-pill { position:absolute; left:0; right:0; top:0; border-radius:7px; background:var(--soft); z-index:0; transition:transform 380ms cubic-bezier(0.34,1.4,0.4,1), height 380ms cubic-bezier(0.34,1.4,0.4,1), opacity 200ms ease-out; pointer-events:none; }
+.saas .nav-item { position:relative; z-index:1; }
+.saas .nav-item.active { background:none; color:var(--indigo-2); }
+.saas .nav-item svg { transition:transform 180ms ease-out, color 180ms ease-out; }
+.saas .nav-item:hover svg { transform:scale(1.06) translateY(-1px); color:var(--indigo-2); }
+@media (prefers-reduced-motion:reduce) { .saas .nav-pill { transition:none; } .saas .nav-item svg { transition:none; } }
+@property --ring-angle { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+.saas .fleet-card { position:relative; overflow:hidden; transition:transform 0.15s ease-out; will-change:transform; }
+.saas .fleet-spotlight { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 0.2s ease-out; background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(240,151,122,0.10), transparent 65%); }
+.saas .fleet-card:hover .fleet-spotlight { opacity:1; }
+.saas .fleet-card.selected::before { content:""; position:absolute; inset:-2px; border-radius:13px; padding:2px; background:conic-gradient(from var(--ring-angle), var(--indigo-2), var(--coral), var(--violet), var(--indigo-2)); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; opacity:0; transition:opacity 0.3s ease; }
+.saas .fleet-card.selected.ring-live::before { opacity:1; animation:saas-ring-spin 5s linear infinite; }
+@keyframes saas-ring-spin { to { --ring-angle:360deg; } }
+.saas .status { display:inline-flex; align-items:center; gap:5px; }
+.saas .status-dot { position:relative; width:5px; height:5px; border-radius:50%; background:var(--green-2); display:inline-block; }
+.saas .status-dot .status-pulse { position:absolute; inset:-2px; border-radius:50%; background:var(--green-2); opacity:0.5; transform:scale(0.6); animation:saas-status-pulse 2s ease-out infinite; }
+@keyframes saas-status-pulse { to { transform:scale(2); opacity:0; } }
+.saas .section-heading-right { display:flex; align-items:center; gap:12px; }
+.saas .usage-gauge { position:relative; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--indigo-2) calc(var(--pct) * 1%), var(--border) 0); flex-shrink:0; }
+.saas .usage-gauge::before { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--surface); }
+.saas .usage-gauge-label { position:relative; font-size:9px; font-weight:700; color:var(--ink-2); font-family:"Manrope", Arial, sans-serif; }
+.saas .saas-form input:not([type="checkbox"]):focus, .saas .saas-form select:focus { outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 4px rgba(79,70,229,0.14); }
+.saas .saas-form input, .saas .saas-form select { transition:border-color 0.18s ease-out, box-shadow 0.18s ease-out; }
+.saas .spend-bar-wrap { margin:18px 0 4px; }
+.saas .spend-bar-track { position:relative; height:8px; border-radius:4px; background:var(--border); overflow:hidden; }
+.saas .spend-bar-seg { position:absolute; top:0; height:100%; }
+.saas .spend-seg-spent { left:0; background:var(--indigo-2); }
+.saas .spend-seg-reserved { background:var(--coral); }
+.saas .spend-bar-legend { display:flex; gap:18px; margin-top:12px; flex-wrap:wrap; font-size:11px; color:var(--ink-soft); }
+.saas .spend-bar-legend strong { color:var(--ink-2); margin-left:4px; }
+.saas .legend-dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
+.saas .legend-spent { background:var(--indigo-2); }
+.saas .legend-reserved { background:var(--coral); }
+.saas .legend-remaining { background:var(--border-strong); }
+.saas .fleet-grid .fleet-card.reveal:nth-child(1) { animation-delay:0ms; }
+.saas .fleet-grid .fleet-card.reveal:nth-child(2) { animation-delay:60ms; }
+.saas .fleet-grid .fleet-card.reveal:nth-child(3) { animation-delay:120ms; }
+.saas .fleet-grid .fleet-card.reveal:nth-child(4) { animation-delay:180ms; }
+.saas .fleet-grid .fleet-card.reveal:nth-child(n+5) { animation-delay:220ms; }
+.saas .cta-glow { position:relative; }
+.saas .cta-glow::before { content:""; position:absolute; inset:-2px; border-radius:9px; padding:2px; background:conic-gradient(from var(--ring-angle), var(--indigo-2), var(--coral), var(--violet), var(--indigo-2)); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; animation:saas-ring-spin 3s linear infinite; }
+.saas .cta-glow:disabled { position:static; }
+.saas .cta-glow:disabled::before { display:none; }
 .saas .button { transition:transform 0.15s ease, box-shadow 0.15s ease; }
 .saas .button:hover { transform:translateY(-1px); box-shadow:0 6px 14px #1c2b4316; }
 .saas .button:active { transform:translateY(0) scale(0.97); }
+@keyframes saas-fade-up { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.saas .reveal { animation:saas-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+@media (prefers-reduced-motion:reduce) { .saas .reveal { animation:none; } }
 
 /* Custom cursor: a small dot that grows and warms up over anything clickable. Fine-pointer devices only. */
 @media (pointer:fine) {
