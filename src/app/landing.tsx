@@ -1,10 +1,9 @@
 "use client";
 import { useId } from "react";
-import { ArrowRight, Fingerprint, ShieldCheck, Terminal } from "lucide-react";
+import { ArrowRight, ArrowDown, ArrowUpRight, Terminal } from "lucide-react";
+import Image from "next/image";
+import styles from "./landing.module.css";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "./theme-toggle";
 export function Brand({ compact = false }: { compact?: boolean }) {
   const logoId = useId();
   return <a href="/" aria-label="AgentPass" className={compact ? "flex size-8 shrink-0 items-center justify-center" : "inline-flex items-center gap-2 text-xl font-semibold tracking-tight"}>
@@ -23,13 +22,32 @@ export function Brand({ compact = false }: { compact?: boolean }) {
   </a>;
 }
 export function Landing({ onStart, onSignIn }: { onStart: () => void; onSignIn: () => void }) {
-  return <div className="mx-auto max-w-6xl px-5 sm:px-8">
-    <header className="flex h-20 items-center justify-between gap-4"><Brand /><nav className="flex items-center gap-3"><a className="hidden text-sm text-muted-foreground sm:block" href="#how-it-works">How it works</a><ThemeToggle /><Button variant="outline" onClick={onSignIn}>Sign in</Button></nav></header>
-    <main><section className="grid items-center gap-12 py-16 md:grid-cols-2 md:py-24">
-      <div><Badge variant="outline">Identity & spending authority</Badge><h1 className="my-6 text-5xl leading-[1.12] font-semibold tracking-tight sm:text-6xl">Your agents.<br />Your accounts.<br /><span className="text-foreground">Your rules.</span></h1><p className="max-w-md text-base leading-7 text-muted-foreground">Give every agent an identity. Bind it to your payment accounts. Set the rules once, and keep control as your agents work.</p><Button className="mt-7" size="lg" onClick={onStart}>Create your workspace <ArrowRight /></Button></div>
-      <Card className="[--card-spacing:--spacing(6)]"><CardHeader><Fingerprint className="mb-3 size-7 text-muted-foreground" /><CardTitle>One identity. Every connection.</CardTitle><CardDescription>Illustrative agent passport</CardDescription></CardHeader><CardContent className="space-y-5"><div className="flex items-center gap-3"><div className="flex size-12 items-center justify-center rounded-xl bg-muted text-xl">A</div><div><p className="font-medium">Atlas</p><p className="text-sm text-muted-foreground">Owned by you</p></div><ShieldCheck className="ml-auto size-5 text-muted-foreground" /></div><div className="rounded-lg bg-muted p-4"><p className="text-xs text-muted-foreground">Payment account</p><p className="mt-1 text-sm">Your UPI or card reference</p></div><div className="rounded-lg bg-muted p-4"><p className="text-xs text-muted-foreground">Spending policy</p><p className="mt-1 text-sm">Merchant · Amount · Authority</p></div></CardContent></Card>
-    </section><section id="how-it-works" className="border-t py-12"><h2 className="mb-8 text-2xl font-medium tracking-tight">One place to manage what your agents can do.</h2><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[["Register an identity","Give each agent its own credential and an owner-attested passport."],["Bind an account","Choose the account reference, allowed merchants, and spending limits."],["Authorize purchases","Check permission for a specific merchant, item, and final total."],["Keep the evidence","Review requests, track reported orders, and revoke authority."]].map(([title,detail],i)=><Card key={title}><CardHeader><CardDescription>0{i+1}</CardDescription><CardTitle>{title}</CardTitle></CardHeader><CardContent className="text-sm leading-6 text-muted-foreground">{detail}</CardContent></Card>)}</div></section>
-    <Card className="mb-12"><CardHeader><CardTitle className="flex items-center gap-2"><Terminal className="size-5" />A plugin for the agent you already use.</CardTitle><CardDescription>AgentPass supplies identity and authorization. Your agent’s shopping tools handle the merchant.</CardDescription></CardHeader><CardFooter><Button variant="outline" onClick={onStart}>Connect an agent <ArrowRight /></Button></CardFooter></Card></main>
-    <footer className="flex flex-wrap justify-between gap-4 border-t py-7 text-xs text-muted-foreground"><span>AgentPass</span><a href="https://github.com/Arkane-o7/BuildX-Buildonomics" target="_blank" rel="noreferrer">Source & setup ↗</a></footer>
-  </div>;
+  return <main className={styles.landing}>
+    <section className={styles.hero} aria-labelledby="landing-title">
+      <Image src="/landing-architecture.png" alt="" fill preload sizes="100vw" className={styles.artwork} />
+      <div className={styles.shade} aria-hidden="true" />
+      <header className={styles.header}>
+        <div className={styles.brand}><Brand compact /><span aria-hidden="true">AgentPass</span></div>
+        <nav aria-label="Main navigation"><a className={styles.howLink} href="#how-it-works">How it works</a><button className={styles.signIn} onClick={onSignIn}>Sign in <ArrowUpRight size={15} /></button></nav>
+      </header>
+      <div className={styles.heroContent}>
+        <h1 id="landing-title">Your agents.<br />Your accounts.<br /><span>Your rules.</span></h1>
+        <p>Let your agents get to work.<br />You decide where they spend and how much.</p>
+        <div className={styles.actions}><Button className={styles.startButton} onClick={onStart}>Create your workspace <ArrowRight size={17} /></Button><a href="https://github.com/Arkane-o7/BuildX-Buildonomics#development" target="_blank" rel="noreferrer" className={styles.pluginButton}><Terminal size={17} />Add plugin <ArrowUpRight size={15} /></a></div>
+      </div>
+      <div className={styles.heroFooter}><a href="#how-it-works" aria-label="Explore how AgentPass works"><ArrowDown size={17} /></a></div>
+    </section>
+    <section id="how-it-works" className={styles.workflow} aria-labelledby="workflow-title">
+      <div className={styles.sectionHeading}><span className={styles.sectionLabel}>HOW IT WORKS</span><h2 id="workflow-title">Give them autonomy.<br />Keep the authority.</h2></div>
+      <div className={styles.steps}>
+        {[
+          { title: "Give it an identity", detail: "Register your agent and connect it with its own scoped credential." },
+          { title: "Set its boundaries", detail: "Choose a payment reference, allowed websites, and spending limits." },
+          { title: "Stay in control", detail: "Review purchase requests, track activity, and revoke access when you need to." },
+        ].map((step, index) => <article className={styles.step} key={step.title}><span className={styles.stepNumber}>0{index + 1}</span><h3>{step.title}</h3><p>{step.detail}</p></article>)}
+      </div>
+    </section>
+    <section className={styles.connection} aria-labelledby="connection-title"><div className={styles.connectionTitle}><Terminal size={24} strokeWidth={1.5} /><div><h2 id="connection-title">Your agent. Already compatible.</h2><p>Connect Hermes or another MCP-compatible runtime.</p></div></div><button onClick={onStart}>Connect your agent <ArrowUpRight size={18} /></button></section>
+    <footer className={styles.footer}><span>AgentPass</span><a href="https://github.com/Arkane-o7/BuildX-Buildonomics" target="_blank" rel="noreferrer">Source & setup <ArrowUpRight size={13} /></a></footer>
+  </main>;
 }
